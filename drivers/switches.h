@@ -45,12 +45,20 @@ class Switches {
   void Init();
 
   inline bool sync() const {
+    return !GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_4);
+  }
+
+  inline bool wav1() const {
+    return !GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_5);
+  }
+
+  inline bool wav2() const {
     return !GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_8);
   }
 
   inline uint8_t wave() const {
     return (!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_5) << 1
-	    | !GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_4));
+	    | !GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_8));
   }
 
   DISALLOW_COPY_AND_ASSIGN(Switches);
