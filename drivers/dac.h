@@ -1,6 +1,6 @@
-// Copyright 2013 Olivier Gillet.
+// Copyright 2015 Matthias Puech.
 //
-// Author: Olivier Gillet (ol.gillet@gmail.com)
+// Author: Matthias Puech (matthias.puech@gmail.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,36 +24,38 @@
 //
 // -----------------------------------------------------------------------------
 //
-// System level initialization.
+// Driver for "fake" DAC (PWM)
 
-#include "drivers/system.h"
+#ifndef BATUMI_DRIVERS_DAC_H_
+#define BATUMI_DRIVERS_DAC_H_
 
-#include <stm32f10x_conf.h>
+#include "stmlib/stmlib.h"
+
+const uint8_t kNumChannels = 8;
+const uint16_t kPwmResolution = 13;  // bits
 
 namespace batumi {
 
-void System::Init(uint32_t timer_period, bool application) {
-  SystemInit();
+class Dac {
+ public:
+  Dac() { }
+  ~Dac() { }
   
-  if (application) {
-    NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x4000);
+  void Init();
+  void Update();
+  
+  void set(uint8_t channel, int16_t value) {
+    value_[channel] = (32768 - value) >> (16 - kPwmResolution);
   }
 
-  // enable devices
-  RCC_APB2PeriphClockCmd(
-      RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC |
-      RCC_APB2Periph_ADC1 |
-      RCC_APB2Periph_AFIO, ENABLE);
-  RCC_APB1PeriphClockCmd(
-      RCC_APB1Periph_TIM3 |
-      RCC_APB1Periph_TIM4, ENABLE);
-  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-}
-
-void System::StartTimers() {
-  SysTick_Config(F_CPU / 1000);
-  TIM_Cmd(TIM3, ENABLE);
-  TIM_Cmd(TIM4, ENABLE);
-}
+  void Write();
+  
+ private:
+  uint16_t value_[kNumChannels];
+  
+  DISALLOW_COPY_AND_ASSIGN(Dac);
+};
 
 }  // namespace batumi
+
+#endif  // BATUMI_DRIVERS_DAC_H_

@@ -6,6 +6,7 @@
 #include "drivers/system.h"
 #include "drivers/leds.h"
 #include "drivers/switches.h"
+#include "drivers/dac.h"
 
 using namespace batumi;
 using namespace stmlib;
@@ -13,6 +14,7 @@ using namespace stmlib;
 System sys;
 Leds leds;
 Switches switches;
+Dac dac;
 
 extern "C" {
   void HardFault_Handler(void) { while (1); }
@@ -24,23 +26,17 @@ extern "C" {
   void DebugMon_Handler(void) { }
   void PendSV_Handler(void) { }
   void __cxa_pure_virtual() { while (1); }
+  void assert_failed(uint8_t* file, uint32_t line) { while (1); }
 }
 
 extern "C" {
 
-static __IO uint32_t TimingDelay;
+  static __IO uint32_t TimingDelay;
 
-void SysTick_Handler() {
-  if (TimingDelay != 0x00)
-    TimingDelay--;
-}
-
-void TIM1_UP_IRQHandler(void) {
-  if (TIM_GetITStatus(TIM1, TIM_IT_Update) == RESET) {
-    return;
+  void SysTick_Handler() {
+    if (TimingDelay != 0x00)
+      TimingDelay--;
   }
-
-  TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
 }
 
 void Delay(uint32_t nTime);
@@ -48,9 +44,11 @@ void Delay(uint32_t nTime);
 void Init() {
   sys.Init(F_CPU / 96000 - 1, true);
   system_clock.Init();
-  sys.StartTimers();
   leds.Init();
   switches.Init();
+  dac.Init();
+
+  sys.StartTimers();
 }
 
 void Delay(uint32_t nTime) {
@@ -62,17 +60,13 @@ int main(void) {
 
   Init();
 
-  leds.set(1, 0);
-  leds.set(2, 0);
-  leds.set(3, 0);
+  int16_t phase = 0;
 
   while (1) {
-    static int ledval = 0;
-    leds.set(0, ledval);
-    ledval = 1 - ledval;
-    leds.Write();
-    Delay(250); // wait 250ms
+    Delay(1);
+    for (int i=0; i<8; i++)
+      dac.set(i, phase + i * INT16_MAX / 4);
+    dac.Update();
+    phase += 100;
   }
 }
-}
-
