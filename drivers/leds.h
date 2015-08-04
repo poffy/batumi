@@ -33,6 +33,8 @@
 
 namespace batumi {
 
+const uint8_t kNumLeds = 4;
+
 class Leds {
  public:
   Leds() { }
@@ -47,7 +49,7 @@ class Leds {
   void Write();
   
  private:
-  bool values_[4];
+  bool values_[kNumLeds];
   
   DISALLOW_COPY_AND_ASSIGN(Leds);
 };

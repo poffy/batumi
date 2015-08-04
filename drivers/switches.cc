@@ -32,7 +32,8 @@
 
 namespace batumi {
 
-void Switches::Init() {
+void Switches::Init(Adc *adc) {
+  adc_ = adc;
 
   GPIO_InitTypeDef gpio_init;
   gpio_init.GPIO_Speed = GPIO_Speed_2MHz;
@@ -46,6 +47,18 @@ void Switches::Init() {
 
   gpio_init.GPIO_Pin = GPIO_Pin_4;
   GPIO_Init(GPIOB, &gpio_init);
+}
+
+void Switches::Debounce() {
+  switch_state_[0] = (switch_state_[0] << 1) |
+    !GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_4);
+  switch_state_[1] = (switch_state_[1] << 1) |
+    !GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_5);
+  switch_state_[2] = (switch_state_[2] << 1) |
+    !GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_8);
+  switch_state_[3] = (switch_state_[3] << 1) |
+    (adc_->value(ADC_TACT_SWITCH) > 0);
+
 }
 
 }  // namespace batumi

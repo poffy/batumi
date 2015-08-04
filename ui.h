@@ -1,6 +1,6 @@
-// Copyright 2013 Olivier Gillet.
+// Copyright 2013 Matthias Puech.
 //
-// Author: Olivier Gillet (ol.gillet@gmail.com)
+// Author: Matthias Puech (matthias.puech@gmail.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,54 +24,68 @@
 //
 // -----------------------------------------------------------------------------
 //
-// Driver for the split and function switches.
+// Settings
 
-#ifndef BATUMI_DRIVERS_SWITCHES_H_
-#define BATUMI_DRIVERS_SWITCHES_H_
+#ifndef BATUMI_UI_H_
+#define BATUMI_UI_H_
 
 #include "stmlib/stmlib.h"
-#include <stm32f10x_conf.h>
+
+#include "stmlib/ui/event_queue.h"
+
 #include "drivers/adc.h"
+#include "drivers/leds.h"
+#include "drivers/switches.h"
 
 namespace batumi {
 
-enum Switch {
-  SWITCH_SYNC,
-  SWITCH_WAV1,
-  SWITCH_WAV2,
-  SWITCH_SELECT,
+enum FeatureMode {
+  FEAT_MODE_FREE,
+  FEAT_MODE_QUAD,
+  FEAT_MODE_PHASE,
+  FEAT_MODE_DIVIDE,
+  FEAT_MODE_LAST
 };
 
+enum UiMode {
+  UI_MODE_SPLASH,
+  UI_MODE_NORMAL,
+};
 
-const uint8_t kNumSwitches = 4;
-
-class Switches {
+class Ui {
  public:
-  Switches() { }
-  ~Switches() { }
+  Ui() { }
+  ~Ui() { }
   
   void Init(Adc *adc);
-  void Debounce();
-  
-  inline bool released(uint8_t index) const {
-    return switch_state_[index] == 0x7f;
-  }
-  
-  inline bool just_pressed(uint8_t index) const {
-    return switch_state_[index] == 0x80;
-  }
+  void Poll();
+  void DoEvents();
+  void FlushEvents();
 
-  inline bool pressed(uint8_t index) const {
-    return switch_state_[index] == 0x00;
-  }
+  inline UiMode mode() const { return mode_; }
 
  private:
-  uint8_t switch_state_[kNumSwitches];
+  void OnSwitchPressed(const stmlib::Event& e);
+  void OnSwitchReleased(const stmlib::Event& e);
+  void OnPotChanged(const stmlib::Event& e);
+
+  uint16_t adc_value_[kNumChannels];
+  uint16_t adc_filtered_value_[kNumChannels];
+  uint32_t press_time_[kNumSwitches];
+  bool detect_very_long_press_[kNumSwitches];
+
+  stmlib::EventQueue<32> queue_;
+
+  Leds leds_;
+  Switches switches_;
   Adc *adc_;
 
-  DISALLOW_COPY_AND_ASSIGN(Switches);
+  UiMode mode_;
+  FeatureMode feat_mode_;
+
+  DISALLOW_COPY_AND_ASSIGN(Ui);
 };
 
 }  // namespace batumi
 
-#endif  // BATUMI_DRIVERS_SWITCHES_H_
+#endif  // BATUMI_UI_H_

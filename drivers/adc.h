@@ -24,54 +24,58 @@
 //
 // -----------------------------------------------------------------------------
 //
-// Driver for the split and function switches.
+// Driver for ADC.
 
-#ifndef BATUMI_DRIVERS_SWITCHES_H_
-#define BATUMI_DRIVERS_SWITCHES_H_
+#ifndef BATUMI_DRIVERS_ADC_H_
+#define BATUMI_DRIVERS_ADC_H_
 
 #include "stmlib/stmlib.h"
-#include <stm32f10x_conf.h>
-#include "drivers/adc.h"
 
 namespace batumi {
 
-enum Switch {
-  SWITCH_SYNC,
-  SWITCH_WAV1,
-  SWITCH_WAV2,
-  SWITCH_SELECT,
+const uint8_t kNumChannels = 8;
+
+enum AdcChannel {
+  ADC_CV1,
+  ADC_CV2,
+  ADC_CV3,
+  ADC_CV4,
+  ADC_RESET1,
+  ADC_RESET2,
+  ADC_RESET3,
+  ADC_RESET4,
+  ADC_POT1,
+  ADC_POT2,
+  ADC_POT3,
+  ADC_POT4,
+  ADC_TACT_SWITCH,
 };
 
-
-const uint8_t kNumSwitches = 4;
-
-class Switches {
+class Adc {
  public:
-  Switches() { }
-  ~Switches() { }
+  Adc() { }
+  ~Adc() { }
   
-  void Init(Adc *adc);
-  void Debounce();
-  
-  inline bool released(uint8_t index) const {
-    return switch_state_[index] == 0x7f;
-  }
-  
-  inline bool just_pressed(uint8_t index) const {
-    return switch_state_[index] == 0x80;
+  void Init();
+  void Scan();
+
+  inline int16_t value(uint8_t i) const {
+    if (i<8) return values1_[i];
+    else return values2_[i-8];
   }
 
-  inline bool pressed(uint8_t index) const {
-    return switch_state_[index] == 0x00;
-  }
 
  private:
-  uint8_t switch_state_[kNumSwitches];
-  Adc *adc_;
+  int16_t values1_[kNumChannels];
+  int16_t values2_[kNumChannels];
 
-  DISALLOW_COPY_AND_ASSIGN(Switches);
+  bool state_;
+  uint8_t index_;
+  uint8_t last_read_;
+
+  DISALLOW_COPY_AND_ASSIGN(Adc);
 };
 
 }  // namespace batumi
 
-#endif  // BATUMI_DRIVERS_SWITCHES_H_
+#endif  // BATUMI_DRIVERS_ADC_H_
