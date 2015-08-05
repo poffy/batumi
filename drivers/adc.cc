@@ -77,7 +77,7 @@ void Adc::Init() {
   ADC_StartCalibration(ADC2);
   while (ADC_GetCalibrationStatus(ADC2));
 
-  index_ = kNumChannels - 1;
+  index_ = kNumAdcChannels - 1;
   last_read_ = 0;
   state_ = false;
   Scan();
@@ -90,7 +90,7 @@ void Adc::Scan() {
     values2_[index_] = ADC2->DR - 32768;
     last_read_ = index_;
     ++index_;
-    if (index_ >= kNumChannels) {
+    if (index_ >= kNumAdcChannels) {
       index_ = 0;
     }
 

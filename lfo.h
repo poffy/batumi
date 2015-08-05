@@ -24,41 +24,68 @@
 //
 // -----------------------------------------------------------------------------
 //
-// Driver for the split and function switches.
+// LFO.
 
-#include "drivers/switches.h"
+#ifndef BATUMI_MODULATIONS_LFO_H_
+#define BATUMI_MODULATIONS_LFO_H_
 
-#include <string.h>
+#include "stmlib/stmlib.h"
 
 namespace batumi {
 
-void Switches::Init(Adc *adc) {
-  adc_ = adc;
+const int16_t kOctave = 12 * 128;
 
-  GPIO_InitTypeDef gpio_init;
-  gpio_init.GPIO_Speed = GPIO_Speed_2MHz;
-  gpio_init.GPIO_Mode = GPIO_Mode_IPU;
+enum LfoShape {
+  SHAPE_TRAPEZOID,
+  SHAPE_RAMP,
+  SHAPE_SAW,
+  SHAPE_TRIANGLE,
+};
 
-  gpio_init.GPIO_Pin = GPIO_Pin_8;
-  GPIO_Init(GPIOA, &gpio_init);
+class Lfo {
+ public:
+  typedef int16_t (Lfo::*ComputeSampleFn)();
+   
+  Lfo() { }
+  ~Lfo() { }
+  
+  void Init();
+  void Step();
 
-  gpio_init.GPIO_Pin = GPIO_Pin_5;
-  GPIO_Init(GPIOB, &gpio_init);
+  inline void set_pitch(int16_t pitch) {
+    phase_increment_ = ComputePhaseIncrement(pitch);
+  };
 
-  gpio_init.GPIO_Pin = GPIO_Pin_4;
-  GPIO_Init(GPIOB, &gpio_init);
-}
+  inline void set_phase(uint16_t phase) {
+    initial_phase_ = phase << 16;
+  }
 
-void Switches::Debounce() {
-  switch_state_[0] = (switch_state_[0] << 1) |
-    GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_4);
-  switch_state_[1] = (switch_state_[1] << 1) |
-    GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_5);
-  switch_state_[2] = (switch_state_[2] << 1) |
-    GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_8);
-  switch_state_[3] = (switch_state_[3] << 1) |
-    (adc_->value(ADC_TACT_SWITCH) > 0);
+  inline void set_divider(uint16_t divider) {
+    divider_ = divider;
+  }
 
-}
+  inline void Reset() {
+    phase_ = 0;
+  }
+
+  int16_t ComputeSampleShape(LfoShape s);
+  int16_t ComputeSampleSine();
+  int16_t ComputeSampleTriangle();
+  int16_t ComputeSampleTrapezoid();
+  int16_t ComputeSampleRamp();
+  int16_t ComputeSampleSaw();
+
+ private:
+
+  uint32_t ComputePhaseIncrement(int16_t pitch);
+  uint32_t phase_, divided_phase_;
+  uint16_t divider_, divider_count_;
+  uint32_t initial_phase_;
+  uint32_t phase_increment_;
+
+  DISALLOW_COPY_AND_ASSIGN(Lfo);
+};
 
 }  // namespace batumi
+
+#endif  // BATUMI_MODULATIONS_LFO_H_

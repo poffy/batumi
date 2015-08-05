@@ -33,7 +33,7 @@
 
 namespace batumi {
 
-const uint8_t kNumChannels = 8;
+const uint8_t kNumAdcChannels = 8;
 
 enum AdcChannel {
   ADC_CV1,
@@ -64,10 +64,22 @@ class Adc {
     else return values2_[i-8];
   }
 
+  inline int16_t cv(uint8_t i) const {
+    return value(ADC_CV1+i);
+  }
+
+  inline int16_t reset(uint8_t i) const {
+    return value(ADC_RESET1+i);
+  }
+
+  inline uint16_t pot(uint8_t i) const {
+    return value(ADC_POT1+i) + 32768;
+  }
+
 
  private:
-  int16_t values1_[kNumChannels];
-  int16_t values2_[kNumChannels];
+  int16_t values1_[kNumAdcChannels];
+  int16_t values2_[kNumAdcChannels];
 
   bool state_;
   uint8_t index_;

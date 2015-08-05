@@ -31,8 +31,8 @@
 
 #include "stmlib/stmlib.h"
 
-const uint8_t kNumChannels = 8;
-const uint16_t kPwmResolution = 13;  // bits
+const uint8_t kNumDacChannels = 8;
+const uint16_t kPwmResolution = 12;  // bits
 
 namespace batumi {
 
@@ -42,17 +42,19 @@ class Dac {
   ~Dac() { }
   
   void Init();
-  void Update();
-  
-  void set(uint8_t channel, int16_t value) {
+
+  inline void set(uint8_t channel, int16_t value) {
     value_[channel] = (32768 - value) >> (16 - kPwmResolution);
   }
+
+  inline void set_sine(uint8_t channel, int16_t value) { set(channel, value); }
+  inline void set_asgn(uint8_t channel, int16_t value) { set(channel+4, value); }
 
   void Write();
   
  private:
-  uint16_t value_[kNumChannels];
-  
+  uint16_t value_[kNumDacChannels];
+
   DISALLOW_COPY_AND_ASSIGN(Dac);
 };
 

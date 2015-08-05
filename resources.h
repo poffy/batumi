@@ -24,41 +24,43 @@
 //
 // -----------------------------------------------------------------------------
 //
-// Driver for the split and function switches.
+// Resources definitions.
+//
+// Automatically generated with:
+// make resources
 
-#include "drivers/switches.h"
 
-#include <string.h>
+#ifndef _RESOURCES_H_
+#define _RESOURCES_H_
+
+
+#include "stmlib/stmlib.h"
+
+
 
 namespace batumi {
 
-void Switches::Init(Adc *adc) {
-  adc_ = adc;
+typedef uint8_t ResourceId;
 
-  GPIO_InitTypeDef gpio_init;
-  gpio_init.GPIO_Speed = GPIO_Speed_2MHz;
-  gpio_init.GPIO_Mode = GPIO_Mode_IPU;
+extern const char* string_table[];
 
-  gpio_init.GPIO_Pin = GPIO_Pin_8;
-  GPIO_Init(GPIOA, &gpio_init);
+extern const uint16_t* lookup_table_table[];
 
-  gpio_init.GPIO_Pin = GPIO_Pin_5;
-  GPIO_Init(GPIOB, &gpio_init);
+extern const uint32_t* lookup_table_32_table[];
 
-  gpio_init.GPIO_Pin = GPIO_Pin_4;
-  GPIO_Init(GPIOB, &gpio_init);
-}
+extern const int16_t* waveform_table[];
 
-void Switches::Debounce() {
-  switch_state_[0] = (switch_state_[0] << 1) |
-    GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_4);
-  switch_state_[1] = (switch_state_[1] << 1) |
-    GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_5);
-  switch_state_[2] = (switch_state_[2] << 1) |
-    GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_8);
-  switch_state_[3] = (switch_state_[3] << 1) |
-    (adc_->value(ADC_TACT_SWITCH) > 0);
-
-}
+extern const uint32_t lut_increments[];
+extern const uint32_t lut_lfo_increments[];
+extern const int16_t wav_sine[];
+#define STR_DUMMY 0  // dummy
+#define LUT_INCREMENTS 0
+#define LUT_INCREMENTS_SIZE 97
+#define LUT_LFO_INCREMENTS 1
+#define LUT_LFO_INCREMENTS_SIZE 1025
+#define WAV_SINE 0
+#define WAV_SINE_SIZE 1025
 
 }  // namespace batumi
+
+#endif  // _RESOURCES_H_

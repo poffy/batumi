@@ -41,9 +41,10 @@ const uint16_t kAdcThreshold = 1 << (16 - 10);  // 10 bits
 
 int32_t animation_counter_ = 0;
 
-void Ui::Init(Adc *adc) {
+void Ui::Init(Adc *adc, Lfo lfo[]) {
   mode_ = UI_MODE_SPLASH;
-  feat_mode_ = FEAT_MODE_FREE;
+  lfo_ = lfo;
+  feat_mode_ = FEAT_MODE_DIVIDE;
   adc_ = adc;
   leds_.Init();
   switches_.Init(adc_);
@@ -87,7 +88,7 @@ void Ui::Poll() {
     }
   }
   
-  for (uint8_t i = 0; i <= kNumChannels; ++i) {
+  for (uint8_t i = 0; i <= kNumAdcChannels; ++i) {
     int32_t value = (31 * adc_filtered_value_[i] + adc_->value(i)) >> 5;
     adc_filtered_value_[i] = value;
     int32_t current_value = static_cast<int32_t>(adc_value_[i]);
@@ -104,6 +105,8 @@ void Ui::Poll() {
     if (animation_counter_ % 64 == 0) {
       for (int i=0; i<kNumLeds; i++)
 	leds_.set(i, ((animation_counter_ / 64) % 4) == i);
+      if (animation_counter_ / 64 > 8)
+	mode_ = UI_MODE_NORMAL;
     }
     break;
 
@@ -134,6 +137,8 @@ void Ui::OnSwitchReleased(const Event& e) {
     break;
   case SWITCH_SELECT:
     feat_mode_ = static_cast<FeatureMode>((feat_mode_ + 1) % FEAT_MODE_LAST);
+    for (int i=0; i<4; i++)
+      lfo_[i].Reset();
     break;
   }
 }
@@ -156,9 +161,6 @@ void Ui::DoEvents() {
   }
   if (queue_.idle_time() > 500) {
     queue_.Touch();
-    if (mode_ == UI_MODE_SPLASH) {
-      mode_ = UI_MODE_NORMAL;
-    }
   }
 }
 

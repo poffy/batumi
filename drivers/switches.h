@@ -42,7 +42,6 @@ enum Switch {
   SWITCH_SELECT,
 };
 
-
 const uint8_t kNumSwitches = 4;
 
 class Switches {

@@ -6,6 +6,7 @@ FAMILY         = f10x
 DENSITY        = md
 MEMORY_MODE    = flash
 # USB            = enabled
+SAMPLE_RATE    = 8192
 
 APPLICATION    = TRUE
 

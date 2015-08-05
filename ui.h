@@ -37,6 +37,8 @@
 #include "drivers/leds.h"
 #include "drivers/switches.h"
 
+#include "lfo.h"
+
 namespace batumi {
 
 enum FeatureMode {
@@ -57,20 +59,25 @@ class Ui {
   Ui() { }
   ~Ui() { }
   
-  void Init(Adc *adc);
+  void Init(Adc *adc, Lfo lfo[4]);
   void Poll();
   void DoEvents();
   void FlushEvents();
 
+  inline FeatureMode feat_mode() const { return feat_mode_; }
   inline UiMode mode() const { return mode_; }
+  inline LfoShape shape() const {
+    return static_cast<LfoShape>((switches_.pressed(2) << 1) |
+				 switches_.pressed(1));
+  }
 
  private:
   void OnSwitchPressed(const stmlib::Event& e);
   void OnSwitchReleased(const stmlib::Event& e);
   void OnPotChanged(const stmlib::Event& e);
 
-  uint16_t adc_value_[kNumChannels];
-  uint16_t adc_filtered_value_[kNumChannels];
+  uint16_t adc_value_[kNumAdcChannels];
+  uint16_t adc_filtered_value_[kNumAdcChannels];
   uint32_t press_time_[kNumSwitches];
   bool detect_very_long_press_[kNumSwitches];
 
@@ -79,6 +86,7 @@ class Ui {
   Leds leds_;
   Switches switches_;
   Adc *adc_;
+  Lfo *lfo_;
 
   UiMode mode_;
   FeatureMode feat_mode_;

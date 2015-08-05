@@ -38,12 +38,12 @@ void Dac::Init() {
   GPIO_InitTypeDef gpio_init;
   gpio_init.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 |
     GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9;
-  gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+  gpio_init.GPIO_Speed = GPIO_Speed_2MHz;
   gpio_init.GPIO_Mode = GPIO_Mode_AF_PP;
   GPIO_Init(GPIOB, &gpio_init);
 
   gpio_init.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
-  gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+  gpio_init.GPIO_Speed = GPIO_Speed_2MHz;
   gpio_init.GPIO_Mode = GPIO_Mode_AF_PP;
   GPIO_Init(GPIOA, &gpio_init);
 
@@ -74,17 +74,21 @@ void Dac::Init() {
   TIM_OC2Init(TIM4, &output_compare);
   TIM_OC3Init(TIM4, &output_compare);
   TIM_OC4Init(TIM4, &output_compare);
+
+  for (int i=0; i<kNumDacChannels; i++)
+    value_[i] = 0;
+  Write();
 }
 
-void Dac::Update() {
+void Dac::Write() {
   TIM_SetCompare1(TIM3, value_[0]);
   TIM_SetCompare2(TIM3, value_[1]);
   TIM_SetCompare3(TIM3, value_[2]);
   TIM_SetCompare4(TIM3, value_[3]);
-  TIM_SetCompare1(TIM4, value_[4]);
+  TIM_SetCompare3(TIM4, value_[4]);
   TIM_SetCompare2(TIM4, value_[5]);
-  TIM_SetCompare3(TIM4, value_[6]);
+  TIM_SetCompare1(TIM4, value_[6]);
   TIM_SetCompare4(TIM4, value_[7]);
 }
 
-}  // namespace peaks
+}  // namespace batumi
