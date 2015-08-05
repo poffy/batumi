@@ -45,6 +45,7 @@ void Lfo::Init() {
   phase_increment_ = UINT32_MAX >> 8;
   divider_ = 1;
   divider_count_ = 0;
+  level_ = UINT16_MAX;
 }
 
 void Lfo::Step() {
@@ -85,29 +86,33 @@ int16_t Lfo::ComputeSampleShape(LfoShape s) {
   case SHAPE_TRAPEZOID:
     return ComputeSampleTrapezoid();
   }
-  return -1;
+  return 0;
 }
 
 int16_t Lfo::ComputeSampleSine() {
   uint32_t phase = initial_phase_ + divided_phase_;
-  return Interpolate1022(wav_sine, phase);
+  int16_t sine = Interpolate1022(wav_sine, phase);
+  return sine * level_ >> 16;
 }
 
 int16_t Lfo::ComputeSampleTriangle() {
   uint32_t phase = initial_phase_ + divided_phase_;
-  return phase < 1UL << 31
+  int16_t tri = phase < 1UL << 31
       ? -32768 + (phase >> 15)
       :  32767 - (phase >> 15);
+  return tri * level_ >> 16;
 }
 
 int16_t Lfo::ComputeSampleSaw() {
   uint32_t phase = initial_phase_ + divided_phase_;
-  return 32767 - (phase >> 16);
+  int16_t saw = 32767 - (phase >> 16);
+  return saw * level_ >> 16;
 }
 
 int16_t Lfo::ComputeSampleRamp() {
   uint32_t phase = initial_phase_ + divided_phase_;
-  return -32678 + (phase >> 16);
+  int16_t ramp = -32678 + (phase >> 16);
+  return ramp * level_ >> 16;
 }
 
 int16_t Lfo::ComputeSampleTrapezoid() {
@@ -115,7 +120,7 @@ int16_t Lfo::ComputeSampleTrapezoid() {
   int16_t tri = phase < 1UL << 31 ? -32768 + (phase >> 15) :  32767 - (phase >> 15);
   int32_t trap = tri * 2;
   CONSTRAIN(trap, INT16_MIN, INT16_MAX);
-  return trap;
+  return trap * level_ >> 16;
 }
 
 }  // namespace batumi

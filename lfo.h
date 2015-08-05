@@ -64,6 +64,10 @@ class Lfo {
     divider_ = divider;
   }
 
+  inline void set_level(uint16_t level) {
+    level_ = level;
+  }
+
   inline void Reset() {
     phase_ = 0;
   }
@@ -80,6 +84,7 @@ class Lfo {
   uint32_t ComputePhaseIncrement(int16_t pitch);
   uint32_t phase_, divided_phase_;
   uint16_t divider_, divider_count_;
+  uint16_t level_;
   uint32_t initial_phase_;
   uint32_t phase_increment_;
 

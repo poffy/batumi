@@ -52,6 +52,7 @@ enum FeatureMode {
 enum UiMode {
   UI_MODE_SPLASH,
   UI_MODE_NORMAL,
+  UI_MODE_ZOOM,
 };
 
 class Ui {

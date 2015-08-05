@@ -44,7 +44,7 @@ int32_t animation_counter_ = 0;
 void Ui::Init(Adc *adc, Lfo lfo[]) {
   mode_ = UI_MODE_SPLASH;
   lfo_ = lfo;
-  feat_mode_ = FEAT_MODE_DIVIDE;
+  feat_mode_ = FEAT_MODE_FREE;
   adc_ = adc;
   leds_.Init();
   switches_.Init(adc_);
@@ -115,8 +115,15 @@ void Ui::Poll() {
       leds_.set(i, false);
     leds_.set(feat_mode_, true);
     break;
+
+  case UI_MODE_ZOOM:
+    animation_counter_++;
+    for (uint8_t i=0; i<kNumLeds; i++)
+      leds_.set(i, false);
+    leds_.set(feat_mode_, animation_counter_ & 128);
+    break;
   }
-  
+
   leds_.Write();
 }
 
@@ -130,15 +137,27 @@ void Ui::OnSwitchPressed(const Event& e) {
 void Ui::OnSwitchReleased(const Event& e) {
   switch (e.control_id) {
   case SWITCH_SYNC:
-    break;
   case SWITCH_WAV1:
-    break;
   case SWITCH_WAV2:
     break;
   case SWITCH_SELECT:
-    feat_mode_ = static_cast<FeatureMode>((feat_mode_ + 1) % FEAT_MODE_LAST);
-    for (int i=0; i<4; i++)
-      lfo_[i].Reset();
+    if (e.data > kVeryLongPressDuration) {
+    } else if (e.data > kLongPressDuration) {
+      mode_ = UI_MODE_ZOOM;
+    } else {
+      switch (mode_) {
+      case UI_MODE_SPLASH:
+	break;
+      case UI_MODE_ZOOM:
+	mode_ = UI_MODE_NORMAL;
+	break;
+      case UI_MODE_NORMAL:
+	feat_mode_ = static_cast<FeatureMode>((feat_mode_ + 1) % FEAT_MODE_LAST);
+	for (int i=0; i<4; i++)
+	  lfo_[i].Init();
+	break;
+      }
+    }
     break;
   }
 }
