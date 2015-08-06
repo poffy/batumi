@@ -53,6 +53,12 @@ extern const int16_t* waveform_table[];
 extern const uint32_t lut_increments[];
 extern const uint32_t lut_lfo_increments[];
 extern const int16_t wav_sine[];
+extern const int16_t wav_saw10[];
+extern const int16_t wav_saw100[];
+extern const int16_t wav_tri10[];
+extern const int16_t wav_tri100[];
+extern const int16_t wav_trap10[];
+extern const int16_t wav_trap100[];
 #define STR_DUMMY 0  // dummy
 #define LUT_INCREMENTS 0
 #define LUT_INCREMENTS_SIZE 97
@@ -60,6 +66,18 @@ extern const int16_t wav_sine[];
 #define LUT_LFO_INCREMENTS_SIZE 1025
 #define WAV_SINE 0
 #define WAV_SINE_SIZE 1025
+#define WAV_SAW10 1
+#define WAV_SAW10_SIZE 1025
+#define WAV_SAW100 2
+#define WAV_SAW100_SIZE 1025
+#define WAV_TRI10 3
+#define WAV_TRI10_SIZE 1025
+#define WAV_TRI100 4
+#define WAV_TRI100_SIZE 1025
+#define WAV_TRAP10 5
+#define WAV_TRAP10_SIZE 1025
+#define WAV_TRAP100 6
+#define WAV_TRAP100_SIZE 1025
 
 }  // namespace batumi
 

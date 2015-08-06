@@ -34,6 +34,9 @@
 namespace batumi {
 
 const int16_t kOctave = 12 * 128;
+const int16_t kPitch1Hz = -32 * 128; /* TODO: ??? */
+const int16_t kPitch10Hz = 4 * 128;
+const int16_t kPitch100Hz = 44 * 128;
 
 enum LfoShape {
   SHAPE_TRAPEZOID,
@@ -82,6 +85,7 @@ class Lfo {
  private:
 
   uint32_t ComputePhaseIncrement(int16_t pitch);
+  int16_t pitch_;
   uint32_t phase_, divided_phase_;
   uint16_t divider_, divider_count_;
   uint16_t level_;
