@@ -41,6 +41,8 @@
 
 namespace batumi {
 
+const uint8_t kFinePotDivider = 8;
+
 enum FeatureMode {
   FEAT_MODE_FREE,
   FEAT_MODE_QUAD,
@@ -53,6 +55,7 @@ enum UiMode {
   UI_MODE_SPLASH,
   UI_MODE_NORMAL,
   UI_MODE_ZOOM,
+  UI_MODE_CATCHUP,
 };
 
 class Ui {
@@ -65,6 +68,14 @@ class Ui {
   void DoEvents();
   void FlushEvents();
 
+  uint16_t pot(uint8_t channel) {
+    int32_t pot = pot_coarse_value_[channel]  +
+      (pot_fine_value_[channel] - 32768) / 8;
+
+    CONSTRAIN(pot, 0, UINT16_MAX);
+    return pot;
+  }
+
   inline FeatureMode feat_mode() const { return feat_mode_; }
   inline UiMode mode() const { return mode_; }
   inline LfoShape shape() const {
@@ -76,11 +87,15 @@ class Ui {
   void OnSwitchPressed(const stmlib::Event& e);
   void OnSwitchReleased(const stmlib::Event& e);
   void OnPotChanged(const stmlib::Event& e);
+  void SyncWithPots();
 
-  uint16_t adc_value_[kNumAdcChannels];
-  uint16_t adc_filtered_value_[kNumAdcChannels];
+  uint16_t pot_value_[4];
+  uint16_t pot_filtered_value_[4];
+  uint16_t pot_coarse_value_[4];
+  uint16_t pot_fine_value_[4];
   uint32_t press_time_[kNumSwitches];
   bool detect_very_long_press_[kNumSwitches];
+  bool catchup_state_[4];
 
   stmlib::EventQueue<32> queue_;
 

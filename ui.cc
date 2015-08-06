@@ -35,9 +35,10 @@ namespace batumi {
 using namespace std;
 using namespace stmlib;
 
-const int32_t kLongPressDuration = 800;
+const int32_t kLongPressDuration = 500;
 const int32_t kVeryLongPressDuration = 2000;
-const uint16_t kAdcThreshold = 1 << (16 - 10);  // 10 bits
+const uint16_t kPotMoveThreshold = 1 << (16 - 10);  // 10 bits
+const uint16_t kCatchupThreshold = 1 << 10;
 
 int32_t animation_counter_ = 0;
 
@@ -48,6 +49,7 @@ void Ui::Init(Adc *adc, Lfo lfo[]) {
   adc_ = adc;
   leds_.Init();
   switches_.Init(adc_);
+  SyncWithPots();
 }
 
 void Ui::Poll() {
@@ -87,18 +89,21 @@ void Ui::Poll() {
       detect_very_long_press_[i] = false;
     }
   }
-  
-  for (uint8_t i = 0; i <= kNumAdcChannels; ++i) {
-    int32_t value = (31 * adc_filtered_value_[i] + adc_->value(i)) >> 5;
-    adc_filtered_value_[i] = value;
-    int32_t current_value = static_cast<int32_t>(adc_value_[i]);
-    if (value >= current_value + kAdcThreshold ||
-        value <= current_value - kAdcThreshold) {
+
+  // filter the pot values and emit events when changed
+  for (uint8_t i = 0; i < 4; ++i) {
+    uint16_t adc_value = adc_->pot(i);
+    int32_t value = (31 * pot_filtered_value_[i] + adc_value) >> 5;
+    pot_filtered_value_[i] = value;
+    int32_t current_value = static_cast<int32_t>(pot_value_[i]);
+    if (value >= current_value + kPotMoveThreshold ||
+	value <= current_value - kPotMoveThreshold) {
       queue_.AddEvent(CONTROL_POT, i, value);
-      adc_value_[i] = value;
+      pot_value_[i] = value;
     }
   }
   
+  // paint the interface
   switch (mode_) {
   case UI_MODE_SPLASH:
     animation_counter_++;
@@ -121,6 +126,19 @@ void Ui::Poll() {
     for (uint8_t i=0; i<kNumLeds; i++)
       leds_.set(i, false);
     leds_.set(feat_mode_, animation_counter_ & 128);
+    break;
+
+  case UI_MODE_CATCHUP:
+    animation_counter_++;
+    for (uint8_t i=0; i<kNumLeds; i++) {
+      bool flash = (animation_counter_ & 64) &&
+	(animation_counter_ & 32) &&
+	(animation_counter_ & 16);
+      if (i == feat_mode_)
+	leds_.set(i, true);
+      if (catchup_state_[i])
+	leds_.set(i, i==feat_mode_ ? !flash : flash);
+    }
     break;
   }
 
@@ -149,9 +167,19 @@ void Ui::OnSwitchReleased(const Event& e) {
       case UI_MODE_SPLASH:
 	break;
       case UI_MODE_ZOOM:
+
 	mode_ = UI_MODE_NORMAL;
+	// detect if pots have moved during zoom
+	for (int i=0; i<4; i++)
+	  if (abs(pot_value_[i] - pot_coarse_value_[i]) > kCatchupThreshold) {
+	    catchup_state_[i] = true;
+	    mode_ = UI_MODE_CATCHUP;
+	  }
 	break;
+
       case UI_MODE_NORMAL:
+      case UI_MODE_CATCHUP:
+
 	feat_mode_ = static_cast<FeatureMode>((feat_mode_ + 1) % FEAT_MODE_LAST);
 	for (int i=0; i<4; i++)
 	  lfo_[i].Init();
@@ -163,6 +191,32 @@ void Ui::OnSwitchReleased(const Event& e) {
 }
 
 void Ui::OnPotChanged(const Event& e) {
+  switch (mode_) {
+  case UI_MODE_SPLASH:
+    break;
+  case UI_MODE_NORMAL:
+    pot_coarse_value_[e.control_id] = e.data;
+    break;
+  case UI_MODE_ZOOM:
+    pot_fine_value_[e.control_id] = e.data;
+    break;
+  case UI_MODE_CATCHUP:
+    if (abs(e.data - pot_coarse_value_[e.control_id]) < kCatchupThreshold) {
+      pot_coarse_value_[e.control_id] = e.data;
+      pot_fine_value_[e.control_id] = 0;
+      catchup_state_[e.control_id] = false;
+
+      // exit catchup mode when all pots have caught up with their
+      // previous value
+      bool exit = true;
+      for (int i=0; i<4; i++)
+	if (catchup_state_[i] == true)
+	  exit = false;
+      if (exit)
+	mode_ = UI_MODE_NORMAL;
+    }
+    break;
+  }
 }
 
 void Ui::DoEvents() {
@@ -181,6 +235,10 @@ void Ui::DoEvents() {
   if (queue_.idle_time() > 500) {
     queue_.Touch();
   }
+}
+
+void Ui::SyncWithPots() {
+  // TODO
 }
 
 }  // namespace batumi
