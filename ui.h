@@ -87,7 +87,6 @@ class Ui {
   void OnSwitchPressed(const stmlib::Event& e);
   void OnSwitchReleased(const stmlib::Event& e);
   void OnPotChanged(const stmlib::Event& e);
-  void SyncWithPots();
 
   uint16_t pot_value_[4];
   uint16_t pot_filtered_value_[4];

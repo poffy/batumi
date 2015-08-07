@@ -49,7 +49,14 @@ void Ui::Init(Adc *adc, Lfo lfo[]) {
   adc_ = adc;
   leds_.Init();
   switches_.Init(adc_);
-  SyncWithPots();
+
+  // synchronize pots at startup
+  for (uint8_t i=0; i<4; i++) {
+    uint16_t adc_value = adc_->pot(i);
+    pot_value_[i] = pot_filtered_value_[i] = pot_coarse_value_[i] = adc_value;
+    pot_fine_value_[i] = (1 << 15);
+    catchup_state_[i] = false;
+  }
 }
 
 void Ui::Poll() {
@@ -235,10 +242,6 @@ void Ui::DoEvents() {
   if (queue_.idle_time() > 500) {
     queue_.Touch();
   }
-}
-
-void Ui::SyncWithPots() {
-  // TODO
 }
 
 }  // namespace batumi

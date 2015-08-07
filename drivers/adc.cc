@@ -80,7 +80,12 @@ void Adc::Init() {
   index_ = kNumAdcChannels - 1;
   last_read_ = 0;
   state_ = false;
-  Scan();
+
+  // read all current values by scanning completely once
+  for (uint8_t i=0; i<kNumAdcChannels * 2; i++) {
+    Scan();
+    for(int j=0; j<2000; j++);	// wait a bit for the mux to catch up
+  }
 }
 
 void Adc::Scan() {
