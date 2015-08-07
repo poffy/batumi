@@ -41,8 +41,8 @@ extern "C" {
 void Init() {
   sys.Init(F_CPU / SAMPLE_RATE - 1, true);
   system_clock.Init();
-  ui.Init(&adc, lfo);
   adc.Init();
+  ui.Init(&adc, lfo); // must be after adc
   dac.Init();
   for (int i=0; i<kNumChannels; i++)
     lfo[i].Init();

@@ -60,8 +60,7 @@ void System::Init(uint32_t timer_period, bool application) {
   timer_init.TIM_RepetitionCounter = 0;
   TIM_InternalClockConfig(TIM1);
   TIM_TimeBaseInit(TIM1, &timer_init);
-  TIM_Cmd(TIM1, ENABLE);
-  
+
   NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  // 2.2 priority split.
   
   NVIC_InitTypeDef timer_interrupt;
@@ -76,6 +75,7 @@ void System::Init(uint32_t timer_period, bool application) {
 void System::StartTimers() {
   // UI refresh etc. at 25Hz
   SysTick_Config(F_CPU / 1000);
+  TIM_Cmd(TIM1, ENABLE);
   TIM_Cmd(TIM3, ENABLE);
   TIM_Cmd(TIM4, ENABLE);
   TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);
