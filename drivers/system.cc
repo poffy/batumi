@@ -73,7 +73,6 @@ void System::Init(uint32_t timer_period, bool application) {
 }
 
 void System::StartTimers() {
-  // UI refresh etc. at 25Hz
   SysTick_Config(F_CPU / 1000);
   TIM_Cmd(TIM1, ENABLE);
   TIM_Cmd(TIM3, ENABLE);

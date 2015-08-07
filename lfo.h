@@ -65,6 +65,9 @@ class Lfo {
 
   inline void set_divider(uint16_t divider) {
     divider_ = divider;
+    // roughly take into account clock division for wave choice:
+    divided_pitch_ = pitch_;
+    for (uint16_t div = divider_; div > 1; div >>= 1, divided_pitch_ -= kOctave);
   }
 
   inline void set_level(uint16_t level) {
@@ -86,6 +89,7 @@ class Lfo {
 
   uint32_t ComputePhaseIncrement(int16_t pitch);
   int16_t pitch_;
+  int16_t divided_pitch_;
   uint32_t phase_, divided_phase_;
   uint16_t divider_, divider_count_;
   uint16_t level_;
