@@ -42,6 +42,7 @@ using namespace stmlib;
 void Lfo::Init() {
   phase_ = 0;
   divided_phase_ = 0;
+  initial_phase_ = 0;
   phase_increment_ = UINT32_MAX >> 8;
   divider_ = 1;
   divider_count_ = 0;
