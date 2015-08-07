@@ -122,12 +122,6 @@ void Ui::Poll() {
     }
     break;
 
-  case UI_MODE_NORMAL:
-    for (uint8_t i=0; i<kNumLeds; i++)
-      leds_.set(i, false);
-    leds_.set(feat_mode_, true);
-    break;
-
   case UI_MODE_ZOOM:
     animation_counter_++;
     for (uint8_t i=0; i<kNumLeds; i++)
@@ -135,16 +129,16 @@ void Ui::Poll() {
     leds_.set(feat_mode_, animation_counter_ & 128);
     break;
 
-  case UI_MODE_CATCHUP:
+  case UI_MODE_NORMAL:
     animation_counter_++;
+    bool flash = (animation_counter_ & 64) &&
+      (animation_counter_ & 32) &&
+      (animation_counter_ & 16);
     for (uint8_t i=0; i<kNumLeds; i++) {
-      bool flash = (animation_counter_ & 64) &&
-	(animation_counter_ & 32) &&
-	(animation_counter_ & 16);
-      if (i == feat_mode_)
-	leds_.set(i, true);
       if (catchup_state_[i])
 	leds_.set(i, i==feat_mode_ ? !flash : flash);
+      else
+	leds_.set(i, i == feat_mode_);
     }
     break;
   }
@@ -174,19 +168,15 @@ void Ui::OnSwitchReleased(const Event& e) {
       case UI_MODE_SPLASH:
 	break;
       case UI_MODE_ZOOM:
-
-	mode_ = UI_MODE_NORMAL;
 	// detect if pots have moved during zoom
 	for (int i=0; i<4; i++)
 	  if (abs(pot_value_[i] - pot_coarse_value_[i]) > kCatchupThreshold) {
 	    catchup_state_[i] = true;
-	    mode_ = UI_MODE_CATCHUP;
 	  }
+	mode_ = UI_MODE_NORMAL;
 	break;
 
       case UI_MODE_NORMAL:
-      case UI_MODE_CATCHUP:
-
 	feat_mode_ = static_cast<FeatureMode>((feat_mode_ + 1) % FEAT_MODE_LAST);
 	for (int i=0; i<4; i++)
 	  lfo_[i].Init();
@@ -201,26 +191,13 @@ void Ui::OnPotChanged(const Event& e) {
   switch (mode_) {
   case UI_MODE_SPLASH:
     break;
-  case UI_MODE_NORMAL:
-    pot_coarse_value_[e.control_id] = e.data;
-    break;
   case UI_MODE_ZOOM:
     pot_fine_value_[e.control_id] = e.data;
     break;
-  case UI_MODE_CATCHUP:
+  case UI_MODE_NORMAL:
     if (abs(e.data - pot_coarse_value_[e.control_id]) < kCatchupThreshold) {
       pot_coarse_value_[e.control_id] = e.data;
-      pot_fine_value_[e.control_id] = 0;
       catchup_state_[e.control_id] = false;
-
-      // exit catchup mode when all pots have caught up with their
-      // previous value
-      bool exit = true;
-      for (int i=0; i<4; i++)
-	if (catchup_state_[i] == true)
-	  exit = false;
-      if (exit)
-	mode_ = UI_MODE_NORMAL;
     }
     break;
   }
