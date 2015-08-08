@@ -21,7 +21,7 @@ void Processor::Init(Ui *ui, Adc *adc, Dac *dac) {
 }
 
 inline int16_t AdcValuesToPitch(uint16_t pot, int16_t cv) {
-  return -6192 +
+  return -4656 +
     ((pot - 32768) * 10205 >> 15) +
     (cv * 5 * 12 * 128 >> 15);
 }
