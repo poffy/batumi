@@ -41,8 +41,6 @@ const int32_t kVeryLongPressDuration = 2000;
 const uint16_t kPotMoveThreshold = 1 << (16 - 10);  // 10 bits
 const uint16_t kCatchupThreshold = 1 << 10;
 
-int32_t animation_counter_ = 0;
-
 stmlib::Storage<0x8020000, 4> storage;
 
 void Ui::Init(Adc *adc) {
@@ -50,6 +48,7 @@ void Ui::Init(Adc *adc) {
   adc_ = adc;
   leds_.Init();
   switches_.Init(adc_);
+  animation_counter_ = 0;
 
   if (!storage.ParsimoniousLoad(&feat_mode_, SETTINGS_SIZE, &version_token_)) {
     feat_mode_ = FEAT_MODE_FREE;
@@ -120,13 +119,13 @@ void Ui::Poll() {
   // paint the interface
   switch (mode_) {
   case UI_MODE_SPLASH:
-    animation_counter_++;
     if (animation_counter_ % 64 == 0) {
       for (int i=0; i<kNumLeds; i++)
 	leds_.set(i, ((animation_counter_ / 64) % 4) == i);
-      if (animation_counter_ / 64 > 8)
+      if (animation_counter_ / 64 > 3)
 	mode_ = UI_MODE_NORMAL;
     }
+    animation_counter_++;
     break;
 
   case UI_MODE_ZOOM:

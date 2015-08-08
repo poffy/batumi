@@ -45,6 +45,10 @@ void Leds::Init() {
   gpio_init.GPIO_Speed = GPIO_Speed_2MHz;
   gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOA, &gpio_init);
+
+  for (int i=0; i<kNumLeds; i++)
+    values_[i] = 0;
+  Write();
 }
 
 void Leds::Write() {

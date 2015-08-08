@@ -76,7 +76,7 @@ void Dac::Init() {
   TIM_OC4Init(TIM4, &output_compare);
 
   for (int i=0; i<kNumDacChannels; i++)
-    value_[i] = 0;
+    value_[i] = UINT16_MAX;
   Write();
 }
 

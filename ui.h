@@ -94,6 +94,8 @@ class Ui {
   bool detect_very_long_press_[kNumSwitches];
   bool catchup_state_[4];
 
+  int32_t animation_counter_;
+
   stmlib::EventQueue<32> queue_;
 
   Leds leds_;
