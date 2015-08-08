@@ -29,11 +29,6 @@ extern "C" {
   void PendSV_Handler(void) { }
   void __cxa_pure_virtual() { while (1); }
   void assert_failed(uint8_t* file, uint32_t line) { while (1); }
-
-  void SysTick_Handler() {
-    system_clock.Tick();  // Tick global ms counter.
-    ui.Poll();
-  }
 }
 
 void Init() {
@@ -56,6 +51,13 @@ int main(void) {
 
 extern "C" {
 
+  // slow timer for the UI
+  void SysTick_Handler() {
+    system_clock.Tick();  // Tick global ms counter.
+    ui.Poll();
+  }
+
+  // fast timer for processing
   void TIM1_UP_IRQHandler(void) {
     if (TIM_GetITStatus(TIM1, TIM_IT_Update) == RESET) {
       return;
