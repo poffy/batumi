@@ -45,16 +45,16 @@ void Lfo::Init() {
   initial_phase_ = 0;
   phase_increment_ = UINT32_MAX >> 8;
   divider_ = 1;
-  divider_count_ = 0;
+  divider_counter_ = 0;
   level_ = UINT16_MAX;
 }
 
 void Lfo::Step() {
   phase_ += phase_increment_;
   if (phase_ < phase_increment_)
-    divider_count_ = (divider_count_ + 1) % divider_;
+    divider_counter_ = (divider_counter_ + 1) % divider_;
   divided_phase_ = phase_ / divider_ +
-    UINT32_MAX / divider_ * divider_count_;
+    UINT32_MAX / divider_ * divider_counter_;
 }
 
 uint32_t Lfo::ComputePhaseIncrement(int16_t pitch) {
