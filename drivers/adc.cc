@@ -62,8 +62,8 @@ void Adc::Init() {
   ADC_Init(ADC1, &adc_init);
   ADC_Init(ADC2, &adc_init);
 
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_239Cycles5);
-  ADC_RegularChannelConfig(ADC2, ADC_Channel_0, 1, ADC_SampleTime_239Cycles5);
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_55Cycles5);
+  ADC_RegularChannelConfig(ADC2, ADC_Channel_0, 1, ADC_SampleTime_55Cycles5);
 
   ADC_Cmd(ADC1, ENABLE);
   ADC_Cmd(ADC2, ENABLE);
@@ -80,7 +80,7 @@ void Adc::Init() {
   index_ = kNumAdcChannels - 1;
   last_read_ = 0;
   state_ = false;
-
+  
   // read all current values by scanning completely once
   for (uint8_t i=0; i<kNumAdcChannels * 2; i++) {
     Scan();
