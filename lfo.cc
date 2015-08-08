@@ -103,16 +103,15 @@ int16_t Lfo::ComputeSampleTriangle() {
   int16_t tri = phase < 1UL << 31
       ? -32768 + (phase >> 15)
       :  32767 - (phase >> 15);
-  int16_t pitch = divided_pitch_;
+  uint32_t pi = phase_increment_ / divider_ >> 16;
   int16_t x = 0;
-  if (pitch > kPitch100Hz) {
+  if (pi > kPI100Hz) {
     x = Interpolate1022(wav_tri100, phase);
-  } else if (pitch > kPitch10Hz) {
-    uint16_t balance = static_cast<int32_t>(pitch - kPitch10Hz) *
-      65535L / (kPitch100Hz - kPitch10Hz);
+  } else if (pi > kPI10Hz) {
+    uint16_t balance = (pi - kPI10Hz) * 65535L / (kPI100Hz - kPI10Hz);
     x = Crossfade1022(wav_tri10, wav_tri100, phase, balance);
-  } else if (pitch > kPitch1Hz) {
-    uint16_t balance = (pitch - kPitch1Hz) * 65535L / (kPitch10Hz - kPitch1Hz);
+  } else if (pi > kPI1Hz) {
+    uint16_t balance = (pi - kPI1Hz) * 65535L / (kPI10Hz - kPI1Hz);
     int32_t a = tri;
     int32_t b = Interpolate1022(wav_tri10, phase);
     x = a + ((b - a) * static_cast<int32_t>(balance) >> 16);
@@ -129,21 +128,24 @@ int16_t Lfo::ComputeSampleSaw() {
 int16_t Lfo::ComputeSampleRamp() {
   uint32_t phase = initial_phase_ + divided_phase_;
   int16_t ramp = -32678 + (phase >> 16);
-  int16_t pitch = divided_pitch_;
+  uint32_t pi = phase_increment_ / divider_ >> 16;
   int16_t x = 0;
-  if (pitch > kPitch100Hz) {
+  if (pi > kPI100Hz) {
     x = Interpolate1022(wav_saw100, phase);
-  } else if (pitch > kPitch10Hz) {
-    uint16_t balance = static_cast<int32_t>(pitch - kPitch10Hz) *
-      65535L / (kPitch100Hz - kPitch10Hz);
+    // x = INT16_MAX / 2;
+  } else if (pi > kPI10Hz) {
+    uint16_t balance = (pi - kPI10Hz) * 65535L / (kPI100Hz - kPI10Hz);
     x = Crossfade1022(wav_saw10, wav_saw100, phase, balance);
-  } else if (pitch > kPitch1Hz) {
-    uint16_t balance = (pitch - kPitch1Hz) * 65535L / (kPitch10Hz - kPitch1Hz);
+    // x = balance - 32768;
+  } else if (pi > kPI1Hz) {
+    uint16_t balance = (pi - kPI1Hz) * 65535L / (kPI10Hz - kPI1Hz);
     int32_t a = ramp;
     int32_t b = Interpolate1022(wav_saw10, phase);
     x = a + ((b - a) * static_cast<int32_t>(balance) >> 16);
+    // x = balance - 32768;
   } else {
     x = ramp;
+    // x = INT16_MAX / 5;
   }
   return x * level_ >> 16;
 }
@@ -153,16 +155,15 @@ int16_t Lfo::ComputeSampleTrapezoid() {
   int16_t tri = phase < 1UL << 31 ? -32768 + (phase >> 15) :  32767 - (phase >> 15);
   int32_t trap = tri * 2;
   CONSTRAIN(trap, INT16_MIN, INT16_MAX);
-  int16_t pitch = divided_pitch_;
+  uint32_t pi = phase_increment_ / divider_ >> 16;
   int16_t x = 0;
-  if (pitch > kPitch100Hz) {
+  if (pi > kPI100Hz) {
     x = Interpolate1022(wav_trap100, phase);
-  } else if (pitch > kPitch10Hz) {
-    uint16_t balance = static_cast<int32_t>(pitch - kPitch10Hz) *
-      65535L / (kPitch100Hz - kPitch10Hz);
+  } else if (pi > kPI10Hz) {
+    uint16_t balance = (pi - kPI10Hz) * 65535L / (kPI100Hz - kPI10Hz);
     x = Crossfade1022(wav_trap10, wav_trap100, phase, balance);
-  } else if (pitch > kPitch1Hz) {
-    uint16_t balance = (pitch - kPitch1Hz) * 65535L / (kPitch10Hz - kPitch1Hz);
+  } else if (pi > kPI1Hz) {
+    uint16_t balance = (pi - kPI1Hz) * 65535L / (kPI10Hz - kPI1Hz);
     int32_t a = trap;
     int32_t b = Interpolate1022(wav_trap10, phase);
     x = a + ((b - a) * static_cast<int32_t>(balance) >> 16);

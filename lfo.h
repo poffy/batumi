@@ -34,9 +34,11 @@
 namespace batumi {
 
 const int16_t kOctave = 12 * 128;
-const int16_t kPitch1Hz = -32 * 128; /* TODO: ??? */
-const int16_t kPitch10Hz = 4 * 128;
-const int16_t kPitch100Hz = 44 * 128;
+
+/* phase increment values for given frequencies */
+const uint32_t kPI1Hz = UINT16_MAX / SAMPLE_RATE * 1;
+const uint32_t kPI10Hz = UINT16_MAX / SAMPLE_RATE * 10;
+const uint32_t kPI100Hz = UINT16_MAX / SAMPLE_RATE * 100;
 
 enum LfoShape {
   SHAPE_TRAPEZOID,
@@ -58,15 +60,16 @@ class Lfo {
     phase_increment_ = ComputePhaseIncrement(pitch);
   };
 
+  inline void set_period(uint32_t period) {
+    phase_increment_ = UINT32_MAX / period;
+  }
+
   inline void set_phase(uint16_t phase) {
     initial_phase_ = phase << 16;
   }
 
   inline void set_divider(uint16_t divider) {
     divider_ = divider;
-    // roughly take into account clock division for wave choice:
-    divided_pitch_ = pitch_;
-    for (uint16_t div = divider_; div > 1; div >>= 1, divided_pitch_ -= kOctave);
   }
 
   inline void set_level(uint16_t level) {
@@ -88,7 +91,6 @@ class Lfo {
 
   uint32_t ComputePhaseIncrement(int16_t pitch);
   int16_t pitch_;
-  int16_t divided_pitch_;
   uint32_t phase_, divided_phase_;
   uint16_t divider_, divider_count_;
   uint16_t level_;
