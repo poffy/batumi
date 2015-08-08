@@ -42,9 +42,8 @@ const uint16_t kCatchupThreshold = 1 << 10;
 
 int32_t animation_counter_ = 0;
 
-void Ui::Init(Adc *adc, Lfo lfo[]) {
+void Ui::Init(Adc *adc) {
   mode_ = UI_MODE_SPLASH;
-  lfo_ = lfo;
   feat_mode_ = FEAT_MODE_FREE;
   adc_ = adc;
   leds_.Init();
@@ -178,8 +177,6 @@ void Ui::OnSwitchReleased(const Event& e) {
 
       case UI_MODE_NORMAL:
 	feat_mode_ = static_cast<FeatureMode>((feat_mode_ + 1) % FEAT_MODE_LAST);
-	for (int i=0; i<4; i++)
-	  lfo_[i].Init();
 	break;
       }
     }

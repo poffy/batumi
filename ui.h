@@ -37,8 +37,6 @@
 #include "drivers/leds.h"
 #include "drivers/switches.h"
 
-#include "lfo.h"
-
 namespace batumi {
 
 const uint8_t kFinePotDivider = 8;
@@ -62,7 +60,7 @@ class Ui {
   Ui() { }
   ~Ui() { }
   
-  void Init(Adc *adc, Lfo lfo[4]);
+  void Init(Adc *adc);
   void Poll();
   void DoEvents();
   void FlushEvents();
@@ -77,9 +75,8 @@ class Ui {
 
   inline FeatureMode feat_mode() const { return feat_mode_; }
   inline UiMode mode() const { return mode_; }
-  inline LfoShape shape() const {
-    return static_cast<LfoShape>((switches_.pressed(2) << 1) |
-				 switches_.pressed(1));
+  inline uint8_t shape() const {
+    return (switches_.pressed(2) << 1) | switches_.pressed(1);
   }
 
  private:
@@ -100,7 +97,6 @@ class Ui {
   Leds leds_;
   Switches switches_;
   Adc *adc_;
-  Lfo *lfo_;
 
   UiMode mode_;
   FeatureMode feat_mode_;

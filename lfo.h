@@ -47,7 +47,6 @@ enum LfoShape {
 
 class Lfo {
  public:
-  typedef int16_t (Lfo::*ComputeSampleFn)();
    
   Lfo() { }
   ~Lfo() { }
