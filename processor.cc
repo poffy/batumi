@@ -6,6 +6,8 @@
 
 namespace batumi {
 
+const uint8_t kDivisions[6] = {2, 3, 4, 8, 16, 32};
+
 void Processor::Init(Ui *ui, Adc *adc, Dac *dac) {
   ui_ = ui;
   adc_ = adc;
@@ -14,15 +16,23 @@ void Processor::Init(Ui *ui, Adc *adc, Dac *dac) {
   // no need to Init the LFOs, it'll be done in Process on first run
 }
 
-int16_t AdcValuesToPitch(uint16_t pot, int16_t cv) {
+inline int16_t AdcValuesToPitch(uint16_t pot, int16_t cv) {
   return -4656 +
     ((pot - 32768) * 10205 >> 15) +
     (cv * 5 * 12 * 128 >> 15);
 }
 
+inline uint8_t AdcValuesToDivider(uint16_t pot, int16_t cv) {
+  int32_t ctrl = pot + cv;
+  CONSTRAIN(ctrl, 0, UINT16_MAX);
+  uint8_t div_index = (static_cast<uint32_t>(65535 - ctrl) * 6) >> 16;
+  return kDivisions[div_index];
+}
+
 void Processor::Process() {
 
-  if(ui_->mode() == UI_MODE_SPLASH)
+  // do not run during the small splash animation
+  if (ui_->mode() == UI_MODE_SPLASH)
     return;
 
   // reset the LFOs if mode changed
@@ -35,7 +45,7 @@ void Processor::Process() {
   switch (ui_->feat_mode()) {
   case FEAT_MODE_FREE:
   {
-    for (int i=0; i<kNumChannels; i++) {
+    for (uint8_t i=0; i<kNumChannels; i++) {
       int16_t pitch = AdcValuesToPitch(ui_->pot(i), adc_->cv(i));
       lfo_[i].set_pitch(pitch);
     }
@@ -67,15 +77,12 @@ void Processor::Process() {
   break;
   case FEAT_MODE_DIVIDE:
   {
-    const int8_t kDivisions[6] = {2, 3, 4, 8, 16, 32};
     int16_t pitch = AdcValuesToPitch(ui_->pot(0), adc_->cv(0));
     lfo_[0].set_pitch(pitch);
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].set_pitch(pitch);
-      int32_t ctrl = ui_->pot(i) + adc_->cv(i);
-      CONSTRAIN(ctrl, 0, UINT16_MAX);
-      uint8_t div_index = (static_cast<uint32_t>(65535 - ctrl) * 6) >> 16;
-      lfo_[i].set_divider(kDivisions[div_index]);
+      lfo_[i].set_divider(AdcValuesToDivider(ui_->pot(i), adc_->cv(i)));
+
     }
   }
   break;
