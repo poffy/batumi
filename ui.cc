@@ -27,6 +27,7 @@
 // User interface.
 
 #include "ui.h"
+#include "stmlib/system/storage.h"
 
 #include <algorithm>
 
@@ -42,12 +43,19 @@ const uint16_t kCatchupThreshold = 1 << 10;
 
 int32_t animation_counter_ = 0;
 
+stmlib::Storage<0x8020000, 4> storage;
+
 void Ui::Init(Adc *adc) {
   mode_ = UI_MODE_SPLASH;
-  feat_mode_ = FEAT_MODE_FREE;
   adc_ = adc;
   leds_.Init();
   switches_.Init(adc_);
+
+  if (!storage.ParsimoniousLoad(&feat_mode_, SETTINGS_SIZE, &version_token_)) {
+    feat_mode_ = FEAT_MODE_FREE;
+    for (int i=0; i<4; i++)
+      pot_fine_value_[i] = 1 << 15;
+  }
 
   // synchronize pots at startup
   for (uint8_t i=0; i<4; i++) {
@@ -177,6 +185,7 @@ void Ui::OnSwitchReleased(const Event& e) {
 
       case UI_MODE_NORMAL:
 	feat_mode_ = static_cast<FeatureMode>((feat_mode_ + 1) % FEAT_MODE_LAST);
+	storage.ParsimoniousSave(&feat_mode_, SETTINGS_SIZE, &version_token_);
 	break;
       }
     }
@@ -190,6 +199,7 @@ void Ui::OnPotChanged(const Event& e) {
     break;
   case UI_MODE_ZOOM:
     pot_fine_value_[e.control_id] = e.data;
+    storage.ParsimoniousSave(&feat_mode_, SETTINGS_SIZE, &version_token_);
     break;
   case UI_MODE_NORMAL:
     if (abs(e.data - pot_coarse_value_[e.control_id]) < kCatchupThreshold) {

@@ -90,7 +90,6 @@ class Ui {
   uint16_t pot_value_[4];
   uint16_t pot_filtered_value_[4];
   uint16_t pot_coarse_value_[4];
-  uint16_t pot_fine_value_[4];
   uint32_t press_time_[kNumSwitches];
   bool detect_very_long_press_[kNumSwitches];
   bool catchup_state_[4];
@@ -100,9 +99,19 @@ class Ui {
   Leds leds_;
   Switches switches_;
   Adc *adc_;
-
   UiMode mode_;
+
   FeatureMode feat_mode_;
+  uint8_t padding[3];
+  uint16_t pot_fine_value_[4];
+
+  enum SettingsSize {
+    SETTINGS_SIZE = sizeof(feat_mode_) +
+    sizeof(pot_fine_value_) +
+    sizeof(padding)
+  };
+
+  uint16_t version_token_;
 
   DISALLOW_COPY_AND_ASSIGN(Ui);
 };
