@@ -14,10 +14,14 @@ void Processor::Init(Ui *ui, Adc *adc, Dac *dac) {
   dac_ = dac;
   previous_feat_mode_ = FEAT_MODE_LAST;
   // no need to Init the LFOs, it'll be done in Process on first run
+  for (uint8_t i=0; i<kNumChannels; i++) {
+    reset_trigger_armed_[i]= false;
+    last_reset_[i] = 0;
+  }
 }
 
 inline int16_t AdcValuesToPitch(uint16_t pot, int16_t cv) {
-  return -4656 +
+  return -6192 +
     ((pot - 32768) * 10205 >> 15) +
     (cv * 5 * 12 * 128 >> 15);
 }
@@ -34,6 +38,31 @@ void Processor::Process() {
   // do not run during the small splash animation
   if (ui_->mode() == UI_MODE_SPLASH)
     return;
+
+  for (uint8_t i=0; i<kNumChannels; i++) {
+    // int32_t reset = (15 * filtered_reset_[i] + adc_->reset(i)) >> 4;
+    // filtered_reset_[i] = reset;
+    int16_t reset = adc_->reset(i);
+
+    if (reset < 10000) {
+      reset_trigger_armed_[i] = true;
+    }
+
+    // on each trigger:
+    if (reset > 20000 &&
+	reset_trigger_armed_[i] &&
+	last_reset_[i] > 100) {
+      reset_trigger_armed_[i] = false;
+      last_reset_[i] = 0;
+      if (ui_->sync_mode()) {
+  	// TODO
+      } else {			// reset mode
+  	lfo_[i].Reset();
+      }
+    } else {
+      last_reset_[i]++;
+    }
+  }
 
   // reset the LFOs if mode changed
   if (ui_->feat_mode() != previous_feat_mode_) {
@@ -97,6 +126,4 @@ void Processor::Process() {
     dac_->set_asgn(i, lfo_[i].ComputeSampleShape(shape));
   }
 }
-  
-
 }

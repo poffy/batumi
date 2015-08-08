@@ -28,6 +28,10 @@ private:
 
   FeatureMode previous_feat_mode_;
 
+  uint16_t filtered_reset_[kNumChannels];
+  bool reset_trigger_armed_[kNumChannels];
+  uint32_t last_reset_[kNumChannels];
+
   DISALLOW_COPY_AND_ASSIGN(Processor);
 };
 

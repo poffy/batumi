@@ -78,6 +78,9 @@ class Ui {
   inline uint8_t shape() const {
     return (switches_.pressed(2) << 1) | switches_.pressed(1);
   }
+  inline bool sync_mode() const {
+    return switches_.pressed(0);
+  }
 
  private:
   void OnSwitchPressed(const stmlib::Event& e);
