@@ -81,7 +81,6 @@ uint32_t Lfo::ComputePhaseIncrement(int16_t pitch) {
 }
 
 int16_t Lfo::ComputeSampleShape(LfoShape s) {
-  s = SHAPE_SAW;				// TODO temp
   switch (s) {
   case SHAPE_TRIANGLE:
     return ComputeSampleTriangle();
@@ -98,7 +97,7 @@ int16_t Lfo::ComputeSampleShape(LfoShape s) {
 int16_t Lfo::ComputeSampleSine() {
   uint32_t phase = initial_phase_ + divided_phase_;
   int16_t sine = Interpolate1022(wav_sine, phase);
-  return sine * level_ >> 16;
+  return -sine * level_ >> 16;
 }
 
 int16_t Lfo::ComputeSampleTriangle() {
