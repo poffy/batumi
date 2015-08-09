@@ -70,6 +70,7 @@ class Lfo {
 
   inline void set_divider(uint16_t divider) {
     divider_ = divider;
+    divider_counter_ = cycle_counter_ % divider_;
   }
 
   inline void set_level(uint16_t level) {
@@ -78,7 +79,6 @@ class Lfo {
 
   inline void Reset() {
     phase_ = 0;
-    divider_counter_ = 0;
   }
 
   int16_t ComputeSampleShape(LfoShape s);
@@ -93,7 +93,7 @@ class Lfo {
   uint32_t ComputePhaseIncrement(int16_t pitch);
   int16_t pitch_;
   uint32_t phase_, divided_phase_;
-  uint16_t divider_, divider_counter_;
+  uint16_t divider_, divider_counter_, cycle_counter_;
   uint16_t level_;
   uint32_t initial_phase_;
   uint32_t phase_increment_;

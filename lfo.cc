@@ -46,13 +46,16 @@ void Lfo::Init() {
   phase_increment_ = UINT32_MAX >> 8;
   divider_ = 1;
   divider_counter_ = 0;
+  cycle_counter_ = 0;
   level_ = UINT16_MAX;
 }
 
 void Lfo::Step() {
   phase_ += phase_increment_;
-  if (phase_ < phase_increment_)
+  if (phase_ < phase_increment_) {
     divider_counter_ = (divider_counter_ + 1) % divider_;
+    cycle_counter_++;
+  }
   divided_phase_ = phase_ / divider_ +
     UINT32_MAX / divider_ * divider_counter_;
 }
