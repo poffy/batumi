@@ -7,6 +7,7 @@
 namespace batumi {
 
 const uint8_t kDivisions[6] = {2, 3, 4, 8, 16, 32};
+const int16_t kUnsyncThreshold = INT16_MAX / 16;
 
 void Processor::Init(Ui *ui, Adc *adc, Dac *dac) {
   ui_ = ui;
@@ -35,34 +36,9 @@ inline uint8_t AdcValuesToDivider(uint16_t pot, int16_t cv) {
 
 void Processor::Process() {
 
-  // do not run during the small splash animation
+  // do not run during the splash animation
   if (ui_->mode() == UI_MODE_SPLASH)
     return;
-
-  for (uint8_t i=0; i<kNumChannels; i++) {
-    // int32_t reset = (15 * filtered_reset_[i] + adc_->reset(i)) >> 4;
-    // filtered_reset_[i] = reset;
-    int16_t reset = adc_->reset(i);
-
-    if (reset < 10000) {
-      reset_trigger_armed_[i] = true;
-    }
-
-    // on each trigger:
-    if (reset > 20000 &&
-	reset_trigger_armed_[i] &&
-	last_reset_[i] > 100) {
-      reset_trigger_armed_[i] = false;
-      last_reset_[i] = 0;
-      if (ui_->sync_mode()) {
-  	// TODO
-      } else {			// reset mode
-  	lfo_[i].Reset();
-      }
-    } else {
-      last_reset_[i]++;
-    }
-  }
 
   // reset the LFOs if mode changed
   if (ui_->feat_mode() != previous_feat_mode_) {
@@ -71,12 +47,43 @@ void Processor::Process() {
     previous_feat_mode_ = ui_->feat_mode();
   }
 
+  // detect triggers on the reset input
+  for (uint8_t i=0; i<kNumChannels; i++) {
+    int16_t reset = adc_->reset(i);
+    if (reset < 10000)
+      reset_trigger_armed_[i] = true;
+    reset_triggered_[i] = reset > 20000 &&
+      reset_trigger_armed_[i] &&
+      last_reset_[i] > 100;
+  }
+
   switch (ui_->feat_mode()) {
   case FEAT_MODE_FREE:
   {
     for (uint8_t i=0; i<kNumChannels; i++) {
       int16_t pitch = AdcValuesToPitch(ui_->pot(i), adc_->cv(i));
-      lfo_[i].set_pitch(pitch);
+
+      // on reset rising edge:
+      if (reset_triggered_[i]) {
+	if (ui_->sync_mode()) {
+	  lfo_[i].set_period(last_reset_[i]);
+	  synced_[i] = true;
+	} else {			// reset mode
+	  lfo_[i].Reset();
+	}
+	reset_trigger_armed_[i] = false;
+	last_reset_[i] = 0;
+      } else {
+	last_reset_[i]++;
+      }
+
+      if (!synced_[i] ||
+	  (abs(pitch - last_pitch_[i]) > kUnsyncThreshold)) {
+	lfo_[i].set_pitch(pitch);
+	last_pitch_[i] = pitch;
+	synced_[i] = false;
+      }
+
     }
   }
   break;
@@ -86,10 +93,6 @@ void Processor::Process() {
     lfo_[0].set_pitch(pitch);
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].set_pitch(pitch);
-      // Disabled feature: control levels with the pots
-      // int32_t level = ui_->pot(i) + adc_->cv(i);
-      // CONSTRAIN(level, 0, UINT16_MAX);
-      // lfo_[i].set_level(level);
       lfo_[i].set_phase((kNumChannels - i) * (UINT16_MAX >> 2));
     }
   }

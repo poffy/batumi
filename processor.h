@@ -28,9 +28,11 @@ private:
 
   FeatureMode previous_feat_mode_;
 
-  uint16_t filtered_reset_[kNumChannels];
   bool reset_trigger_armed_[kNumChannels];
+  bool reset_triggered_[kNumChannels];
   uint32_t last_reset_[kNumChannels];
+  int16_t last_pitch_[kNumChannels];
+  bool synced_[kNumChannels];
 
   DISALLOW_COPY_AND_ASSIGN(Processor);
 };
