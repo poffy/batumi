@@ -51,13 +51,15 @@ void Lfo::Init() {
 }
 
 void Lfo::Step() {
-  phase_ += phase_increment_;
   if (phase_ < phase_increment_) {
     divider_counter_ = (divider_counter_ + 1) % divider_;
     cycle_counter_++;
   }
+  phase_ += phase_increment_;
   divided_phase_ = phase_ / divider_ +
-    UINT32_MAX / divider_ * divider_counter_;
+    (UINT32_MAX - UINT32_MAX / 750) / divider_ * divider_counter_;
+  // that substraction is a bit unexplainable, but it avoids an
+  // overflow which advances the divided phases very slightly...
 }
 
 uint32_t Lfo::ComputePhaseIncrement(int16_t pitch) {
@@ -134,20 +136,16 @@ int16_t Lfo::ComputeSampleRamp() {
   int16_t x = 0;
   if (pi > kPI100Hz) {
     x = Interpolate1022(wav_saw100, phase);
-    // x = INT16_MAX / 2;
   } else if (pi > kPI10Hz) {
     uint16_t balance = (pi - kPI10Hz) * 65535L / (kPI100Hz - kPI10Hz);
     x = Crossfade1022(wav_saw10, wav_saw100, phase, balance);
-    // x = balance - 32768;
   } else if (pi > kPI1Hz) {
     uint16_t balance = (pi - kPI1Hz) * 65535L / (kPI10Hz - kPI1Hz);
     int32_t a = ramp;
     int32_t b = Interpolate1022(wav_saw10, phase);
     x = a + ((b - a) * static_cast<int32_t>(balance) >> 16);
-    // x = balance - 32768;
   } else {
     x = ramp;
-    // x = INT16_MAX / 5;
   }
   return x * level_ >> 16;
 }
