@@ -51,14 +51,14 @@ void Lfo::Init() {
 }
 
 void Lfo::Step() {
+  phase_ += phase_increment_;
   if (phase_ < phase_increment_) {
     divider_counter_ = (divider_counter_ + 1) % divider_;
     cycle_counter_++;
   }
-  phase_ += phase_increment_;
   divided_phase_ = phase_ / divider_ +
     (UINT32_MAX - UINT32_MAX / 750) / divider_ * divider_counter_;
-  // that substraction is a bit unexplainable, but it avoids an
+  // that subtraction is a bit unexplainable, but it avoids an
   // overflow which advances the divided phases very slightly...
 }
 
