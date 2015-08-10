@@ -179,6 +179,7 @@ void Ui::OnSwitchReleased(const Event& e) {
 	    catchup_state_[i] = true;
 	  }
 	mode_ = UI_MODE_NORMAL;
+	storage.ParsimoniousSave(&feat_mode_, SETTINGS_SIZE, &version_token_);
 	break;
 
       case UI_MODE_NORMAL:
@@ -197,7 +198,6 @@ void Ui::OnPotChanged(const Event& e) {
     break;
   case UI_MODE_ZOOM:
     pot_fine_value_[e.control_id] = e.data;
-    storage.ParsimoniousSave(&feat_mode_, SETTINGS_SIZE, &version_token_);
     break;
   case UI_MODE_NORMAL:
     if (abs(e.data - pot_coarse_value_[e.control_id]) < kCatchupThreshold) {
