@@ -7,7 +7,7 @@
 namespace batumi {
 
 const uint8_t kDivisions[6] = {2, 3, 4, 8, 16, 32};
-const int16_t kUnsyncThreshold = INT16_MAX / 16;
+const int16_t kUnsyncPotThreshold = INT16_MAX / 20;
 
 void Processor::Init(Ui *ui, Adc *adc, Dac *dac) {
   ui_ = ui;
@@ -34,6 +34,41 @@ inline uint8_t AdcValuesToDivider(uint16_t pot, int16_t cv) {
   return kDivisions[div_index];
 }
 
+void Processor::SetFrequency(int8_t lfo_no) {
+  int16_t reset = adc_->reset(lfo_no);
+
+  // detect triggers on the reset input
+  if (reset < 10000)
+    reset_trigger_armed_[lfo_no] = true;
+  reset_triggered_[lfo_no] = reset > 20000 &&
+    reset_trigger_armed_[lfo_no] &&
+    last_reset_[lfo_no] > 100;
+
+  // sync or reset
+  if (reset_triggered_[lfo_no]) {
+    if (ui_->sync_mode()) {
+      lfo_[lfo_no].set_period(last_reset_[lfo_no]);
+      synced_[lfo_no] = true;
+    } else {			// reset mode
+      lfo_[lfo_no].Reset();
+    }
+    reset_trigger_armed_[lfo_no] = false;
+    last_reset_[lfo_no] = 0;
+  } else {
+    last_reset_[lfo_no]++;
+  }
+
+  int16_t pitch = AdcValuesToPitch(ui_->pot(lfo_no), adc_->cv(lfo_no));
+
+  // set pitch
+  if (!synced_[lfo_no] ||
+      (abs(pitch - last_pitch_[lfo_no]) > kUnsyncPotThreshold)) {
+    lfo_[lfo_no].set_pitch(pitch);
+    last_pitch_[lfo_no] = pitch;
+    synced_[lfo_no] = false;
+  }
+}
+
 void Processor::Process() {
 
   // do not run during the splash animation
@@ -47,81 +82,53 @@ void Processor::Process() {
     previous_feat_mode_ = ui_->feat_mode();
   }
 
-  // detect triggers on the reset input
-  for (uint8_t i=0; i<kNumChannels; i++) {
-    int16_t reset = adc_->reset(i);
-    if (reset < 10000)
-      reset_trigger_armed_[i] = true;
-    reset_triggered_[i] = reset > 20000 &&
-      reset_trigger_armed_[i] &&
-      last_reset_[i] > 100;
-  }
-
   switch (ui_->feat_mode()) {
   case FEAT_MODE_FREE:
   {
     for (uint8_t i=0; i<kNumChannels; i++) {
-      int16_t pitch = AdcValuesToPitch(ui_->pot(i), adc_->cv(i));
-
-      // on reset rising edge:
-      if (reset_triggered_[i]) {
-	if (ui_->sync_mode()) {
-	  lfo_[i].set_period(last_reset_[i]);
-	  synced_[i] = true;
-	} else {			// reset mode
-	  lfo_[i].Reset();
-	}
-	reset_trigger_armed_[i] = false;
-	last_reset_[i] = 0;
-      } else {
-	last_reset_[i]++;
-      }
-
-      if (!synced_[i] ||
-	  (abs(pitch - last_pitch_[i]) > kUnsyncThreshold)) {
-	lfo_[i].set_pitch(pitch);
-	last_pitch_[i] = pitch;
-	synced_[i] = false;
-      }
-
+      SetFrequency(i);
     }
   }
   break;
+
   case FEAT_MODE_QUAD:
   {
-    int16_t pitch = AdcValuesToPitch(ui_->pot(0), adc_->cv(0));
-    lfo_[0].set_pitch(pitch);
+    SetFrequency(0);
     for (int i=1; i<kNumChannels; i++) {
-      lfo_[i].set_pitch(pitch);
-      lfo_[i].set_phase((kNumChannels - i) * (UINT16_MAX >> 2));
+      lfo_[i].link_to(&lfo_[0]);
+      lfo_[i].set_initial_phase((kNumChannels - i) * (UINT16_MAX >> 2));
     }
   }
   break;
+
   case FEAT_MODE_PHASE:
   {
-    int16_t pitch = AdcValuesToPitch(ui_->pot(0), adc_->cv(0));
-    lfo_[0].set_pitch(pitch);
+    SetFrequency(0);
     for (int i=1; i<kNumChannels; i++) {
-      lfo_[i].set_pitch(pitch);
-      lfo_[i].set_phase(ui_->pot(i) + adc_->cv(i));
+      lfo_[i].link_to(&lfo_[0]);
+      lfo_[i].set_initial_phase(ui_->pot(i) + adc_->cv(i));
     }
   }
   break;
+
   case FEAT_MODE_DIVIDE:
   {
-    int16_t pitch = AdcValuesToPitch(ui_->pot(0), adc_->cv(0));
-    lfo_[0].set_pitch(pitch);
+    SetFrequency(0);
     for (int i=1; i<kNumChannels; i++) {
-      lfo_[i].set_pitch(pitch);
+      lfo_[i].link_to(&lfo_[0]);
       lfo_[i].set_divider(AdcValuesToDivider(ui_->pot(i), adc_->cv(i)));
-
+      // we also need to reset the divider count:
+      if (reset_triggered_[0]) {
+	lfo_[i].Reset();
+      }
     }
   }
   break;
+
   case FEAT_MODE_LAST: break;	// to please the compiler
   }
 
-  // send to DAC
+  // send to DAC and step
   for (int i=0; i<kNumChannels; i++) {
     lfo_[i].Step();
     LfoShape shape = static_cast<LfoShape>(ui_->shape());

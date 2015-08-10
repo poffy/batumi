@@ -64,7 +64,7 @@ class Lfo {
     phase_increment_ = UINT32_MAX / period;
   }
 
-  inline void set_phase(uint16_t phase) {
+  inline void set_initial_phase(uint16_t phase) {
     initial_phase_ = phase << 16;
   }
 
@@ -79,6 +79,13 @@ class Lfo {
 
   inline void Reset() {
     phase_ = 0;
+    divider_counter_ = 0;
+    cycle_counter_ = 0;
+  }
+
+  inline void link_to(Lfo *lfo) {
+    phase_ = lfo->phase_;
+    phase_increment_ = lfo->phase_increment_;
   }
 
   int16_t ComputeSampleShape(LfoShape s);
@@ -91,7 +98,6 @@ class Lfo {
  private:
 
   uint32_t ComputePhaseIncrement(int16_t pitch);
-  int16_t pitch_;
   uint32_t phase_, divided_phase_;
   uint16_t divider_, divider_counter_, cycle_counter_;
   uint16_t level_;

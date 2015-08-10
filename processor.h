@@ -34,6 +34,8 @@ private:
   int16_t last_pitch_[kNumChannels];
   bool synced_[kNumChannels];
 
+  void SetFrequency(int8_t lfo_no);
+
   DISALLOW_COPY_AND_ASSIGN(Processor);
 };
 

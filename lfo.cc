@@ -63,7 +63,6 @@ void Lfo::Step() {
 }
 
 uint32_t Lfo::ComputePhaseIncrement(int16_t pitch) {
-  pitch_ = pitch;
   int16_t num_shifts = 0;
   while (pitch < 0) {
     pitch += kOctave;
