@@ -60,7 +60,6 @@ void Ui::Init(Adc *adc) {
   for (uint8_t i=0; i<4; i++) {
     uint16_t adc_value = adc_->pot(i);
     pot_value_[i] = pot_filtered_value_[i] = pot_coarse_value_[i] = adc_value;
-    pot_fine_value_[i] = (1 << 15);
     catchup_state_[i] = false;
   }
 }
