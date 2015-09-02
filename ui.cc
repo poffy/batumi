@@ -38,7 +38,7 @@ using namespace stmlib;
 
 const int32_t kLongPressDuration = 500;
 const int32_t kVeryLongPressDuration = 2000;
-const uint16_t kPotMoveThreshold = 1 << (16 - 10);  // 10 bits
+const int32_t kPotMoveThreshold = 1 << (16 - 10);  // 10 bits
 const uint16_t kCatchupThreshold = 1 << 10;
 
 stmlib::Storage<0x8020000, 4> storage;
@@ -206,7 +206,9 @@ void Ui::OnPotChanged(const Event& e) {
     pot_fine_value_[e.control_id] = e.data;
     break;
   case UI_MODE_NORMAL:
-    if (abs(e.data - pot_coarse_value_[e.control_id]) < kCatchupThreshold) {
+    if (!catchup_state_[e.control_id]) {
+      pot_coarse_value_[e.control_id] = e.data;
+    } else if (abs(e.data - pot_coarse_value_[e.control_id]) < kCatchupThreshold) {
       pot_coarse_value_[e.control_id] = e.data;
       catchup_state_[e.control_id] = false;
     }
