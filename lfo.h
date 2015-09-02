@@ -57,7 +57,10 @@ class Lfo {
   void Step();
 
   inline void set_pitch(int16_t pitch) {
-    phase_increment_ = ComputePhaseIncrement(pitch);
+    if (pitch == INT16_MIN)
+      phase_increment_ = 0;
+    else
+      phase_increment_ = ComputePhaseIncrement(pitch);
   };
 
   inline void set_period(uint32_t period) {

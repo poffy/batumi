@@ -57,6 +57,12 @@ void Processor::SetFrequency(int8_t lfo_no) {
     reset_trigger_armed_[lfo_no] &&
     last_reset_[lfo_no] > 100;
 
+  // hold if negative reset
+  if (reset < -10000) {
+    lfo_[lfo_no].set_pitch(INT16_MIN);
+    return;
+  }
+
   // sync or reset
   if (reset_triggered_[lfo_no]) {
     if (ui_->sync_mode()) {
