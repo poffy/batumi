@@ -184,6 +184,9 @@ void Ui::OnSwitchReleased(const Event& e) {
 
       case UI_MODE_NORMAL:
 	feat_mode_ = static_cast<FeatureMode>((feat_mode_ + 1) % FEAT_MODE_LAST);
+	// reset pots fine value
+	for (int i=0; i<4; i++)
+	  pot_fine_value_[i] = 1 << 15;
 	storage.ParsimoniousSave(&feat_mode_, SETTINGS_SIZE, &version_token_);
 	break;
       }
