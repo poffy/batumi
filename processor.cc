@@ -24,21 +24,25 @@ void Processor::Init(Ui *ui, Adc *adc, Dac *dac) {
   }
 }
 
-inline int16_t AdcValuesToPitch(uint16_t pot, int16_t cv) {
-
-  pot = Interpolate88(lut_scale_freq, pot) - 32768;
+inline int16_t AdcValuesToPitch(uint16_t coarse, int16_t fine, int16_t cv) {
+  coarse = Interpolate88(lut_scale_freq, coarse) - 32768;
+  fine = (1 * kOctave * static_cast<int32_t>(fine)) >> 16;
   cv = cv * 5 * kOctave >> 15;
-  return pot + cv;
+  return coarse + fine + cv;
 }
 
-inline uint8_t AdcValuesToDivider(uint16_t pot, int16_t cv) {
+inline uint8_t AdcValuesToDivider(uint16_t pot, int16_t fine, int16_t cv) {
   int32_t ctrl = pot + cv;
   CONSTRAIN(ctrl, 0, UINT16_MAX);
-  return Interpolate88(lut_scale_divide, ctrl);
+  fine = (5 * static_cast<int32_t>(fine + INT16_MAX / 5)) >> 16;
+  int8_t div = Interpolate88(lut_scale_divide, ctrl);
+  div -= fine;
+  CONSTRAIN(div, 1, 64);
+  return div;
 }
 
-inline uint16_t AdcValuesToPhase(uint16_t pot, int16_t cv) {
-  int32_t ctrl = pot + cv;
+inline uint16_t AdcValuesToPhase(uint16_t pot, int16_t fine, int16_t cv) {
+  int32_t ctrl = pot + cv + fine / 8;
   // no need to clip the result, wrapping around is ok
   return Interpolate88(lut_scale_phase, ctrl);
 }
@@ -67,7 +71,9 @@ void Processor::SetFrequency(int8_t lfo_no) {
     last_reset_[lfo_no]++;
   }
 
-  int16_t pitch = AdcValuesToPitch(ui_->pot(lfo_no), adc_->cv(lfo_no));
+  int16_t pitch = AdcValuesToPitch(ui_->coarse(lfo_no),
+				   ui_->fine(lfo_no),
+				   adc_->cv(lfo_no));
 
   // set pitch
   if (!synced_[lfo_no] ||
@@ -115,7 +121,9 @@ void Processor::Process() {
     SetFrequency(0);
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].link_to(&lfo_[0]);
-      lfo_[i].set_initial_phase(AdcValuesToPhase(ui_->pot(i), adc_->cv(i)));
+      lfo_[i].set_initial_phase(AdcValuesToPhase(ui_->coarse(i),
+						 ui_->fine(i),
+						 adc_->cv(i)));
     }
   }
   break;
@@ -125,7 +133,9 @@ void Processor::Process() {
     SetFrequency(0);
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].link_to(&lfo_[0]);
-      lfo_[i].set_divider(AdcValuesToDivider(ui_->pot(i), adc_->cv(i)));
+      lfo_[i].set_divider(AdcValuesToDivider(ui_->coarse(i),
+					     ui_->fine(i),
+					     adc_->cv(i)));
       // we also need to reset the divider count:
       if (reset_triggered_[0]) {
 	lfo_[i].Reset();

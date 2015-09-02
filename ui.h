@@ -65,12 +65,12 @@ class Ui {
   void DoEvents();
   void FlushEvents();
 
-  uint16_t pot(uint8_t channel) {
-    int32_t pot = pot_coarse_value_[channel]  +
-      (pot_fine_value_[channel] - 32768) / 8;
+  uint16_t coarse(uint8_t channel) {
+    return pot_coarse_value_[channel];
+  }
 
-    CONSTRAIN(pot, 0, UINT16_MAX);
-    return pot;
+  int16_t fine(uint8_t channel) {
+    return pot_fine_value_[channel] - 32768;
   }
 
   inline FeatureMode feat_mode() const { return feat_mode_; }
