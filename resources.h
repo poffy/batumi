@@ -50,8 +50,10 @@ extern const uint32_t* lookup_table_32_table[];
 
 extern const int16_t* waveform_table[];
 
+extern const uint16_t lut_scale_freq[];
+extern const uint16_t lut_scale_phase[];
+extern const uint16_t lut_scale_divide[];
 extern const uint32_t lut_increments[];
-extern const uint32_t lut_lfo_increments[];
 extern const int16_t wav_sine[];
 extern const int16_t wav_saw10[];
 extern const int16_t wav_saw100[];
@@ -60,10 +62,14 @@ extern const int16_t wav_tri100[];
 extern const int16_t wav_trap10[];
 extern const int16_t wav_trap100[];
 #define STR_DUMMY 0  // dummy
+#define LUT_SCALE_FREQ 0
+#define LUT_SCALE_FREQ_SIZE 257
+#define LUT_SCALE_PHASE 1
+#define LUT_SCALE_PHASE_SIZE 257
+#define LUT_SCALE_DIVIDE 2
+#define LUT_SCALE_DIVIDE_SIZE 257
 #define LUT_INCREMENTS 0
 #define LUT_INCREMENTS_SIZE 97
-#define LUT_LFO_INCREMENTS 1
-#define LUT_LFO_INCREMENTS_SIZE 1025
 #define WAV_SINE 0
 #define WAV_SINE_SIZE 1025
 #define WAV_SAW10 1

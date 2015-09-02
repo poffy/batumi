@@ -3,10 +3,13 @@
 
 #include "processor.h"
 #include "ui.h"
+#include "resources.h"
+#include "stmlib/utils/dsp.h"
 
 namespace batumi {
 
-const uint8_t kDivisions[6] = {2, 3, 4, 8, 16, 32};
+using namespace stmlib;
+
 const int16_t kUnsyncPotThreshold = INT16_MAX / 20;
 
 void Processor::Init(Ui *ui, Adc *adc, Dac *dac) {
@@ -22,16 +25,22 @@ void Processor::Init(Ui *ui, Adc *adc, Dac *dac) {
 }
 
 inline int16_t AdcValuesToPitch(uint16_t pot, int16_t cv) {
-  return -4656 +
-    ((pot - 32768) * 10205 >> 15) +
-    (cv * 5 * 12 * 128 >> 15);
+
+  pot = Interpolate88(lut_scale_freq, pot) - 32768;
+  cv = cv * 5 * kOctave >> 15;
+  return pot + cv;
 }
 
 inline uint8_t AdcValuesToDivider(uint16_t pot, int16_t cv) {
   int32_t ctrl = pot + cv;
   CONSTRAIN(ctrl, 0, UINT16_MAX);
-  uint8_t div_index = (static_cast<uint32_t>(65535 - ctrl) * 6) >> 16;
-  return kDivisions[div_index];
+  return Interpolate88(lut_scale_divide, ctrl);
+}
+
+inline uint16_t AdcValuesToPhase(uint16_t pot, int16_t cv) {
+  int32_t ctrl = pot + cv;
+  // no need to clip the result, wrapping around is ok
+  return Interpolate88(lut_scale_phase, ctrl);
 }
 
 void Processor::SetFrequency(int8_t lfo_no) {
@@ -106,7 +115,7 @@ void Processor::Process() {
     SetFrequency(0);
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].link_to(&lfo_[0]);
-      lfo_[i].set_initial_phase(ui_->pot(i) + adc_->cv(i));
+      lfo_[i].set_initial_phase(AdcValuesToPhase(ui_->pot(i), adc_->cv(i)));
     }
   }
   break;

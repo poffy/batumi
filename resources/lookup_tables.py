@@ -34,7 +34,7 @@ import os
 sample_rate = int(os.environ["SAMPLE_RATE"])
 
 """----------------------------------------------------------------------------
-LFO and envelope increments.
+Pitch increments
 ----------------------------------------------------------------------------"""
 
 lookup_tables = []
@@ -52,16 +52,34 @@ lookup_tables_32.append(
     ('increments', increments.astype(int)))
 
 
-min_frequency = 5  # Hertz
-max_frequency = min_frequency * 100  # Hertz
+"""----------------------------------------------------------------------------
+Rough fader scaler (from hand-taken measurements)
+----------------------------------------------------------------------------"""
 
-excursion = 1 << 32
-num_values = 1025
-min_increment = excursion * min_frequency / sample_rate
-max_increment = excursion * max_frequency / sample_rate
+# measurements taken at each marks on the panel
+fader_scale6 = [0, 6637, 23378, 40134, 57125, 65520]
+fader_scale5 = [0, 9972, 31880, 52396, 65520]
 
-rates = numpy.linspace(numpy.log(min_increment),
-                       numpy.log(max_increment), num_values)
-lookup_tables_32.append(
-    ('lfo_increments', numpy.exp(rates).astype(int))
-)
+import math
+from scipy import interpolate
+
+x = numpy.arange(0, 65535, 255)
+
+# scaler for frequency selection
+def freq_to_midi(freq):
+    return (12.0 * math.log(freq/440.0, 2) + 69.0)
+scale_freq = map(freq_to_midi, [0.01, 0.05, 0.5, 2.5, 15, 100])
+scale_freq = [(z * 128) + 32768 for z in scale_freq]
+scale_freq_fun = interpolate.interp1d(fader_scale6, scale_freq, kind='quadratic')
+lookup_tables.append(('scale_freq', scale_freq_fun(x)))
+
+# scaler for phase selection
+step = 65536 / 4
+scale_phase = [(step*0)-1, (step*1)-1, (step*2)-1, (step*3)-1, (step*4)-1]
+scale_divide = [32, 16, 8, 4, 3, 2]
+scale_phase_fun = interpolate.interp1d(fader_scale5, scale_phase, kind='quadratic')
+lookup_tables.append(('scale_phase', scale_phase_fun(x)))
+
+# scaler for divider
+scale_divide_fun = interpolate.interp1d(fader_scale6, scale_divide, kind='nearest')
+lookup_tables.append(('scale_divide', scale_divide_fun(x)))
