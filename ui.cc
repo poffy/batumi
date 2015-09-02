@@ -167,7 +167,10 @@ void Ui::OnSwitchReleased(const Event& e) {
   case SWITCH_SELECT:
     if (e.data > kVeryLongPressDuration) {
     } else if (e.data > kLongPressDuration) {
-      mode_ = UI_MODE_ZOOM;
+      if (mode_ == UI_MODE_NORMAL)
+	mode_ = UI_MODE_ZOOM;
+      else if (mode_ == UI_MODE_ZOOM)
+	mode_ = UI_MODE_NORMAL;
     } else {
       switch (mode_) {
       case UI_MODE_SPLASH:
