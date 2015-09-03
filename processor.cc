@@ -11,6 +11,9 @@ namespace batumi {
 using namespace stmlib;
 
 const int16_t kUnsyncPotThreshold = INT16_MAX / 20;
+const int16_t kResetThresholdLow = 10000;
+const int16_t kResetThresholdHigh = 20000;
+const int16_t kHoldThreshold = -10000;
 
 void Processor::Init(Ui *ui, Adc *adc, Dac *dac) {
   ui_ = ui;
@@ -51,14 +54,23 @@ void Processor::SetFrequency(int8_t lfo_no) {
   int16_t reset = adc_->reset(lfo_no);
 
   // detect triggers on the reset input
-  if (reset < 10000)
+  if (reset < kResetThresholdLow)
     reset_trigger_armed_[lfo_no] = true;
-  reset_triggered_[lfo_no] = reset > 20000 &&
-    reset_trigger_armed_[lfo_no] &&
-    last_reset_[lfo_no] > 100;
+
+  if (reset > kResetThresholdHigh &&
+      reset_trigger_armed_[lfo_no]) {
+    reset_triggered_[lfo_no] = true;
+    int32_t dist_to_trig = kResetThresholdHigh - previous_reset_[lfo_no];
+    int32_t dist_to_next = reset - previous_reset_[lfo_no];
+    reset_subsample_[lfo_no] = dist_to_trig * 32L / dist_to_next;
+  } else {
+    reset_triggered_[lfo_no] = false;
+  }
+
+  previous_reset_[lfo_no] = reset;
 
   // hold if negative reset
-  if (reset < -10000) {
+  if (reset < kHoldThreshold) {
     lfo_[lfo_no].set_pitch(INT16_MIN);
     return;
   }
@@ -69,7 +81,7 @@ void Processor::SetFrequency(int8_t lfo_no) {
       lfo_[lfo_no].set_period(last_reset_[lfo_no]);
       synced_[lfo_no] = true;
     } else {			// reset mode
-      lfo_[lfo_no].Reset();
+      lfo_[lfo_no].Reset(reset_subsample_[lfo_no]);
     }
     reset_trigger_armed_[lfo_no] = false;
     last_reset_[lfo_no] = 0;
@@ -144,7 +156,7 @@ void Processor::Process() {
 					     adc_->cv(i)));
       // we also need to reset the divider count:
       if (reset_triggered_[0]) {
-	lfo_[i].Reset();
+	lfo_[i].Reset(reset_subsample_[0]);
       }
     }
   }
@@ -156,8 +168,8 @@ void Processor::Process() {
   // send to DAC and step
   for (int i=0; i<kNumChannels; i++) {
     lfo_[i].Step();
-    LfoShape shape = static_cast<LfoShape>(ui_->shape());
-    dac_->set_sine(i, lfo_[i].ComputeSampleSine());
+    LfoShape shape = static_cast<LfoShape>(ui_->shape()+1);
+    dac_->set_sine(i, lfo_[i].ComputeSampleShape(SHAPE_SINE));
     dac_->set_asgn(i, lfo_[i].ComputeSampleShape(shape));
   }
 }

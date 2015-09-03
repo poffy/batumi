@@ -30,7 +30,9 @@ private:
 
   bool reset_trigger_armed_[kNumChannels];
   bool reset_triggered_[kNumChannels];
+  uint8_t reset_subsample_[kNumChannels];
   uint32_t last_reset_[kNumChannels];
+  int16_t previous_reset_[kNumChannels];
   int16_t last_pitch_[kNumChannels];
   bool synced_[kNumChannels];
 

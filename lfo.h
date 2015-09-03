@@ -30,6 +30,7 @@
 #define BATUMI_MODULATIONS_LFO_H_
 
 #include "stmlib/stmlib.h"
+#include "resources.h"
 
 namespace batumi {
 
@@ -41,11 +42,14 @@ const uint32_t kPI10Hz = UINT16_MAX / SAMPLE_RATE * 10;
 const uint32_t kPI100Hz = UINT16_MAX / SAMPLE_RATE * 100;
 
 enum LfoShape {
+  SHAPE_SINE,
   SHAPE_TRAPEZOID,
   SHAPE_RAMP,
   SHAPE_SAW,
   SHAPE_TRIANGLE,
 };
+
+const uint8_t kNumLfoShapes = 5;
 
 class Lfo {
  public:
@@ -80,11 +84,7 @@ class Lfo {
     level_ = level;
   }
 
-  inline void Reset() {
-    phase_ = 0;
-    divider_counter_ = 0;
-    cycle_counter_ = 0;
-  }
+  void Reset(uint8_t subsample);
 
   inline void link_to(Lfo *lfo) {
     phase_ = lfo->phase_;
@@ -92,13 +92,19 @@ class Lfo {
   }
 
   int16_t ComputeSampleShape(LfoShape s);
-  int16_t ComputeSampleSine();
-  int16_t ComputeSampleTriangle();
-  int16_t ComputeSampleTrapezoid();
-  int16_t ComputeSampleRamp();
-  int16_t ComputeSampleSaw();
+  int16_t ComputeSampleSine(uint32_t phase);
+  int16_t ComputeSampleTriangle(uint32_t phase);
+  int16_t ComputeSampleTrapezoid(uint32_t phase);
+  int16_t ComputeSampleRamp(uint32_t phase);
+  int16_t ComputeSampleSaw(uint32_t phase);
 
  private:
+
+  inline uint32_t phase() {
+    return phase_ + initial_phase_;
+  }
+
+  int16_t ComputeSampleShape(LfoShape s, uint32_t phase);
 
   uint32_t ComputePhaseIncrement(int16_t pitch);
   uint32_t phase_, divided_phase_;
@@ -106,6 +112,13 @@ class Lfo {
   uint16_t level_;
   uint32_t initial_phase_;
   uint32_t phase_increment_;
+  uint16_t bl_step_counter_;
+  uint8_t reset_subsample_;
+
+  /* values of the oscillators for each shape before and
+   * after reset */
+  int16_t step_begin_[kNumLfoShapes];
+  int16_t step_end_[kNumLfoShapes];
 
   DISALLOW_COPY_AND_ASSIGN(Lfo);
 };

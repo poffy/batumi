@@ -62,6 +62,25 @@ void Lfo::Step() {
   // overflow which advances the divided phases very slightly...
 }
 
+void Lfo::Reset(uint8_t subsample) {
+  /* save the current osc. value and compute the future value at the
+   * end of the reset step */
+  uint32_t end_phase = WAV_BL_STEP0_SIZE * phase_increment_ / divider_;
+  for (int i=0; i<kNumLfoShapes; i++) {
+    LfoShape s = static_cast<LfoShape>(i);
+    step_begin_[i] = ComputeSampleShape(s, phase());
+    step_end_[i] = ComputeSampleShape(s, end_phase);
+  }
+
+  // reset phase etc.
+  phase_ = 0;
+  divider_counter_ = 0;
+  cycle_counter_ = 0;
+  // and start the reset step
+  bl_step_counter_ = WAV_BL_STEP0_SIZE;
+  reset_subsample_ = subsample;
+}
+
 uint32_t Lfo::ComputePhaseIncrement(int16_t pitch) {
   int16_t num_shifts = 0;
   while (pitch < 0) {
@@ -81,28 +100,43 @@ uint32_t Lfo::ComputePhaseIncrement(int16_t pitch) {
       : phase_increment >> -num_shifts;
 }
 
-int16_t Lfo::ComputeSampleShape(LfoShape s) {
+inline int16_t Lfo::ComputeSampleShape(LfoShape s, uint32_t phase) {
   switch (s) {
+  case SHAPE_SINE:
+    return ComputeSampleSine(phase);
   case SHAPE_TRIANGLE:
-    return ComputeSampleTriangle();
+    return ComputeSampleTriangle(phase);
   case SHAPE_SAW:
-    return ComputeSampleSaw();
+    return ComputeSampleSaw(phase);
   case SHAPE_RAMP:
-    return ComputeSampleRamp();
+    return ComputeSampleRamp(phase);
   case SHAPE_TRAPEZOID:
-    return ComputeSampleTrapezoid();
+    return ComputeSampleTrapezoid(phase);
   }
-  return 0;
+  return 0;			// never reached
 }
 
-int16_t Lfo::ComputeSampleSine() {
-  uint32_t phase = initial_phase_ + divided_phase_;
+int16_t Lfo::ComputeSampleShape(LfoShape s) {
+  if (bl_step_counter_ == 0) {
+    return ComputeSampleShape(s, phase());
+  }
+
+  int32_t end = step_begin_[s];
+  int32_t begin = step_end_[s];
+
+  int32_t step = waveform_table[WAV_BL_STEP0 + reset_subsample_][bl_step_counter_];
+  step = (begin - end) * step / 30000 + end;
+  CONSTRAIN(step, INT16_MIN, INT16_MAX);
+  bl_step_counter_--;
+  return step;
+}
+
+int16_t Lfo::ComputeSampleSine(uint32_t phase) {
   int16_t sine = Interpolate1022(wav_sine, phase);
   return -sine * level_ >> 16;
 }
 
-int16_t Lfo::ComputeSampleTriangle() {
-  uint32_t phase = initial_phase_ + divided_phase_;
+int16_t Lfo::ComputeSampleTriangle(uint32_t phase) {
   int16_t tri = phase < 1UL << 31
       ? -32768 + (phase >> 15)
       :  32767 - (phase >> 15);
@@ -124,12 +158,11 @@ int16_t Lfo::ComputeSampleTriangle() {
   return x * level_ >> 16;
 }
 
-int16_t Lfo::ComputeSampleSaw() {
-  return -ComputeSampleRamp();
+int16_t Lfo::ComputeSampleSaw(uint32_t phase) {
+  return -ComputeSampleRamp(phase);
 }
 
-int16_t Lfo::ComputeSampleRamp() {
-  uint32_t phase = initial_phase_ + divided_phase_;
+int16_t Lfo::ComputeSampleRamp(uint32_t phase) {
   int16_t ramp = -32678 + (phase >> 16);
   uint32_t pi = phase_increment_ / divider_ >> 16;
   int16_t x = 0;
@@ -149,8 +182,7 @@ int16_t Lfo::ComputeSampleRamp() {
   return x * level_ >> 16;
 }
 
-int16_t Lfo::ComputeSampleTrapezoid() {
-  uint32_t phase = initial_phase_ + divided_phase_;
+int16_t Lfo::ComputeSampleTrapezoid(uint32_t phase) {
   int16_t tri = phase < 1UL << 31 ? -32768 + (phase >> 15) :  32767 - (phase >> 15);
   int32_t trap = tri * 2;
   CONSTRAIN(trap, INT16_MIN, INT16_MAX);

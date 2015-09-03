@@ -61,6 +61,38 @@ extern const int16_t wav_tri10[];
 extern const int16_t wav_tri100[];
 extern const int16_t wav_trap10[];
 extern const int16_t wav_trap100[];
+extern const int16_t wav_bl_step0[];
+extern const int16_t wav_bl_step1[];
+extern const int16_t wav_bl_step2[];
+extern const int16_t wav_bl_step3[];
+extern const int16_t wav_bl_step4[];
+extern const int16_t wav_bl_step5[];
+extern const int16_t wav_bl_step6[];
+extern const int16_t wav_bl_step7[];
+extern const int16_t wav_bl_step8[];
+extern const int16_t wav_bl_step9[];
+extern const int16_t wav_bl_step10[];
+extern const int16_t wav_bl_step11[];
+extern const int16_t wav_bl_step12[];
+extern const int16_t wav_bl_step13[];
+extern const int16_t wav_bl_step14[];
+extern const int16_t wav_bl_step15[];
+extern const int16_t wav_bl_step16[];
+extern const int16_t wav_bl_step17[];
+extern const int16_t wav_bl_step18[];
+extern const int16_t wav_bl_step19[];
+extern const int16_t wav_bl_step20[];
+extern const int16_t wav_bl_step21[];
+extern const int16_t wav_bl_step22[];
+extern const int16_t wav_bl_step23[];
+extern const int16_t wav_bl_step24[];
+extern const int16_t wav_bl_step25[];
+extern const int16_t wav_bl_step26[];
+extern const int16_t wav_bl_step27[];
+extern const int16_t wav_bl_step28[];
+extern const int16_t wav_bl_step29[];
+extern const int16_t wav_bl_step30[];
+extern const int16_t wav_bl_step31[];
 #define STR_DUMMY 0  // dummy
 #define LUT_SCALE_FREQ 0
 #define LUT_SCALE_FREQ_SIZE 257
@@ -84,6 +116,70 @@ extern const int16_t wav_trap100[];
 #define WAV_TRAP10_SIZE 1025
 #define WAV_TRAP100 6
 #define WAV_TRAP100_SIZE 1025
+#define WAV_BL_STEP0 7
+#define WAV_BL_STEP0_SIZE 8
+#define WAV_BL_STEP1 8
+#define WAV_BL_STEP1_SIZE 8
+#define WAV_BL_STEP2 9
+#define WAV_BL_STEP2_SIZE 8
+#define WAV_BL_STEP3 10
+#define WAV_BL_STEP3_SIZE 8
+#define WAV_BL_STEP4 11
+#define WAV_BL_STEP4_SIZE 8
+#define WAV_BL_STEP5 12
+#define WAV_BL_STEP5_SIZE 8
+#define WAV_BL_STEP6 13
+#define WAV_BL_STEP6_SIZE 8
+#define WAV_BL_STEP7 14
+#define WAV_BL_STEP7_SIZE 8
+#define WAV_BL_STEP8 15
+#define WAV_BL_STEP8_SIZE 8
+#define WAV_BL_STEP9 16
+#define WAV_BL_STEP9_SIZE 8
+#define WAV_BL_STEP10 17
+#define WAV_BL_STEP10_SIZE 8
+#define WAV_BL_STEP11 18
+#define WAV_BL_STEP11_SIZE 8
+#define WAV_BL_STEP12 19
+#define WAV_BL_STEP12_SIZE 8
+#define WAV_BL_STEP13 20
+#define WAV_BL_STEP13_SIZE 8
+#define WAV_BL_STEP14 21
+#define WAV_BL_STEP14_SIZE 8
+#define WAV_BL_STEP15 22
+#define WAV_BL_STEP15_SIZE 8
+#define WAV_BL_STEP16 23
+#define WAV_BL_STEP16_SIZE 8
+#define WAV_BL_STEP17 24
+#define WAV_BL_STEP17_SIZE 8
+#define WAV_BL_STEP18 25
+#define WAV_BL_STEP18_SIZE 8
+#define WAV_BL_STEP19 26
+#define WAV_BL_STEP19_SIZE 8
+#define WAV_BL_STEP20 27
+#define WAV_BL_STEP20_SIZE 8
+#define WAV_BL_STEP21 28
+#define WAV_BL_STEP21_SIZE 8
+#define WAV_BL_STEP22 29
+#define WAV_BL_STEP22_SIZE 8
+#define WAV_BL_STEP23 30
+#define WAV_BL_STEP23_SIZE 8
+#define WAV_BL_STEP24 31
+#define WAV_BL_STEP24_SIZE 8
+#define WAV_BL_STEP25 32
+#define WAV_BL_STEP25_SIZE 8
+#define WAV_BL_STEP26 33
+#define WAV_BL_STEP26_SIZE 8
+#define WAV_BL_STEP27 34
+#define WAV_BL_STEP27_SIZE 8
+#define WAV_BL_STEP28 35
+#define WAV_BL_STEP28_SIZE 8
+#define WAV_BL_STEP29 36
+#define WAV_BL_STEP29_SIZE 8
+#define WAV_BL_STEP30 37
+#define WAV_BL_STEP30_SIZE 8
+#define WAV_BL_STEP31 38
+#define WAV_BL_STEP31_SIZE 8
 
 }  // namespace batumi
 
