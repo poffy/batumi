@@ -88,9 +88,11 @@ void Processor::SetFrequency(int8_t lfo_no) {
     last_reset_[lfo_no]++;
   }
 
+  int16_t cv = (adc_->cv(lfo_no) * ui_->atten(lfo_no)) >> 16;
+
   int16_t pitch = AdcValuesToPitch(ui_->coarse(lfo_no),
 				   ui_->fine(lfo_no),
-				   adc_->cv(lfo_no));
+				   cv);
 
   // set pitch
   if (!synced_[lfo_no] ||
@@ -113,6 +115,9 @@ void Processor::Process() {
       lfo_[i].Init();
     previous_feat_mode_ = ui_->feat_mode();
   }
+
+  for (int i=0; i<kNumChannels; i++)
+    lfo_[i].set_level(ui_->level(i));
 
   switch (ui_->feat_mode()) {
   case FEAT_MODE_FREE:
@@ -138,9 +143,10 @@ void Processor::Process() {
     SetFrequency(0);
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].link_to(&lfo_[0]);
+      int16_t cv = (adc_->cv(i) * ui_->atten(i)) >> 16;
       lfo_[i].set_initial_phase(AdcValuesToPhase(ui_->coarse(i),
 						 ui_->fine(i),
-						 adc_->cv(i)));
+						 cv));
     }
   }
   break;
@@ -150,9 +156,10 @@ void Processor::Process() {
     SetFrequency(0);
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].link_to(&lfo_[0]);
+      int16_t cv = (adc_->cv(i) * ui_->atten(i)) >> 16;
       lfo_[i].set_divider(AdcValuesToDivider(ui_->coarse(i),
 					     ui_->fine(i),
-					     adc_->cv(i)));
+					     cv));
       // we also need to reset the divider count:
       if (reset_triggered_[0]) {
 	lfo_[i].Reset(reset_subsample_[0]);
