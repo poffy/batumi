@@ -186,10 +186,10 @@ void Processor::Process() {
   case FEAT_MODE_LAST: break;	// to please the compiler
   }
 
+  LfoShape shape = static_cast<LfoShape>(ui_->shape()+1);
   // send to DAC and step
   for (int i=0; i<kNumChannels; i++) {
     lfo_[i].Step();
-    LfoShape shape = static_cast<LfoShape>(ui_->shape()+1);
     dac_->set_sine(i, lfo_[i].ComputeSampleShape(SHAPE_SINE));
     dac_->set_asgn(i, lfo_[i].ComputeSampleShape(shape));
   }
