@@ -45,6 +45,7 @@ void Lfo::Init() {
   initial_phase_ = 0;
   phase_increment_ = UINT32_MAX >> 8;
   divider_ = 1;
+  multiplier_ = 1;
   divider_counter_ = 0;
   cycle_counter_ = 0;
   level_ = UINT16_MAX;
@@ -60,12 +61,14 @@ void Lfo::Step() {
     (UINT32_MAX - UINT32_MAX / 750) / divider_ * divider_counter_;
   // that subtraction is a bit unexplainable, but it avoids an
   // overflow which advances the divided phases very slightly...
+  multiplied_phase_ = divided_phase_ * multiplier_;
 }
 
 void Lfo::Reset(uint8_t subsample) {
   /* save the current osc. value and compute the future value at the
    * end of the reset step */
-  uint32_t end_phase = WAV_BL_STEP0_SIZE * phase_increment_ / divider_;
+  uint32_t end_phase = WAV_BL_STEP0_SIZE *
+    phase_increment_ / divider_ * multiplier_;
   for (int i=0; i<kNumLfoShapes; i++) {
     LfoShape s = static_cast<LfoShape>(i);
     step_begin_[i] = ComputeSampleShape(s, phase());
@@ -142,7 +145,7 @@ int16_t Lfo::ComputeSampleTriangle(uint32_t phase) {
   int16_t tri = phase < 1UL << 31
       ? -32768 + (phase >> 15)
       :  32767 - (phase >> 15);
-  uint32_t pi = phase_increment_ / divider_ >> 16;
+  uint32_t pi = phase_increment_ / divider_ * multiplier_ >> 16;
   int16_t x = 0;
   if (pi > kPI100Hz) {
     x = Interpolate1022(wav_tri100, phase);
@@ -166,7 +169,7 @@ int16_t Lfo::ComputeSampleSaw(uint32_t phase) {
 
 int16_t Lfo::ComputeSampleRamp(uint32_t phase) {
   int16_t ramp = -32678 + (phase >> 16);
-  uint32_t pi = phase_increment_ / divider_ >> 16;
+  uint32_t pi = phase_increment_ / divider_ * multiplier_ >> 16;
   int16_t x = 0;
   if (pi > kPI100Hz) {
     x = Interpolate1022(wav_saw100, phase);
@@ -188,7 +191,7 @@ int16_t Lfo::ComputeSampleTrapezoid(uint32_t phase) {
   int16_t tri = phase < 1UL << 31 ? -32768 + (phase >> 15) :  32767 - (phase >> 15);
   int32_t trap = tri * 2;
   CONSTRAIN(trap, INT16_MIN, INT16_MAX);
-  uint32_t pi = phase_increment_ / divider_ >> 16;
+  uint32_t pi = phase_increment_ / divider_ * multiplier_ >> 16;
   int16_t x = 0;
   if (pi > kPI100Hz) {
     x = Interpolate1022(wav_trap100, phase);
