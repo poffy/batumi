@@ -47,6 +47,7 @@ enum LfoShape {
   SHAPE_RAMP,
   SHAPE_SAW,
   SHAPE_TRIANGLE,
+  SHAPE_SQUARE
 };
 
 const uint8_t kNumLfoShapes = 5;
@@ -84,6 +85,10 @@ class Lfo {
     level_ = level;
   }
 
+  inline uint16_t level() {
+    return level_;
+  }
+
   void Reset(uint8_t subsample);
 
   inline void link_to(Lfo *lfo) {
@@ -97,6 +102,7 @@ class Lfo {
   int16_t ComputeSampleTrapezoid(uint32_t phase);
   int16_t ComputeSampleRamp(uint32_t phase);
   int16_t ComputeSampleSaw(uint32_t phase);
+  int16_t ComputeSampleSquare(uint32_t phase);
 
  private:
 

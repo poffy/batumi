@@ -112,6 +112,8 @@ inline int16_t Lfo::ComputeSampleShape(LfoShape s, uint32_t phase) {
     return ComputeSampleRamp(phase);
   case SHAPE_TRAPEZOID:
     return ComputeSampleTrapezoid(phase);
+  case SHAPE_SQUARE:
+    return ComputeSampleSquare(phase);
   }
   return 0;			// never reached
 }
@@ -202,6 +204,13 @@ int16_t Lfo::ComputeSampleTrapezoid(uint32_t phase) {
     x = trap;
   }
   return x * level_ >> 16;
+}
+
+int16_t Lfo::ComputeSampleSquare(uint32_t phase) {
+  if (phase < UINT32_MAX / 2)
+    return INT16_MAX;
+  else
+    return INT16_MIN;
 }
 
 }  // namespace batumi
