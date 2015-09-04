@@ -124,6 +124,7 @@ void Processor::Process() {
   {
     for (uint8_t i=0; i<kNumChannels; i++) {
       SetFrequency(i);
+      lfo_[i].set_initial_phase(ui_->parameter(i));
     }
   }
   break;
@@ -154,12 +155,15 @@ void Processor::Process() {
   case FEAT_MODE_DIVIDE:
   {
     SetFrequency(0);
+    lfo_[0].set_initial_phase(ui_->parameter(0));
+
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].link_to(&lfo_[0]);
       int16_t cv = (adc_->cv(i) * ui_->atten(i)) >> 16;
       lfo_[i].set_divider(AdcValuesToDivider(ui_->coarse(i),
 					     ui_->fine(i),
 					     cv));
+      lfo_[i].set_initial_phase(ui_->parameter(i));
       // we also need to reset the divider count:
       if (reset_triggered_[0]) {
 	lfo_[i].Reset(reset_subsample_[0]);
