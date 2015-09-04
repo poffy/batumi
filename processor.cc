@@ -69,11 +69,11 @@ void Processor::SetFrequency(int8_t lfo_no) {
 
   previous_reset_[lfo_no] = reset;
 
-  // hold if negative reset
-  if (reset < kHoldThreshold) {
-    lfo_[lfo_no].set_pitch(INT16_MIN);
-    return;
-  }
+  // // hold if negative reset
+  // if (reset < kHoldThreshold) {
+  //   lfo_[lfo_no].set_pitch(INT16_MIN);
+  //   return;
+  // }
 
   // sync or reset
   if (reset_triggered_[lfo_no]) {
