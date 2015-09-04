@@ -120,6 +120,7 @@ void Processor::Process() {
     lfo_[i].set_level(ui_->level(i));
 
   switch (ui_->feat_mode()) {
+
   case FEAT_MODE_FREE:
   {
     for (uint8_t i=0; i<kNumChannels; i++) {
@@ -142,13 +143,23 @@ void Processor::Process() {
   case FEAT_MODE_PHASE:
   {
     SetFrequency(0);
-    for (int i=1; i<kNumChannels; i++) {
-      lfo_[i].link_to(&lfo_[0]);
-      int16_t cv = (adc_->cv(i) * ui_->atten(i)) >> 16;
-      lfo_[i].set_initial_phase(AdcValuesToPhase(ui_->coarse(i),
-						 ui_->fine(i),
-						 cv));
-    }
+
+    // if all the pots are maxed out, quadrature mode
+    if (ui_->coarse(1) > UINT16_MAX - 256 &&
+	ui_->coarse(2) > UINT16_MAX - 256 &&
+	ui_->coarse(3) > UINT16_MAX - 256)
+      for (int i=1; i<kNumChannels; i++) {
+	lfo_[i].link_to(&lfo_[0]);
+	lfo_[i].set_initial_phase((kNumChannels - i) * (UINT16_MAX >> 2));
+      }
+    else // normal phase mode
+      for (int i=1; i<kNumChannels; i++) {
+	lfo_[i].link_to(&lfo_[0]);
+	int16_t cv = (adc_->cv(i) * ui_->atten(i)) >> 16;
+	lfo_[i].set_initial_phase(AdcValuesToPhase(ui_->coarse(i),
+						   ui_->fine(i),
+						   cv));
+      }
   }
   break;
 
