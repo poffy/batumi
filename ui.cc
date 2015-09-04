@@ -52,8 +52,12 @@ void Ui::Init(Adc *adc) {
 
   if (!storage.ParsimoniousLoad(&feat_mode_, SETTINGS_SIZE, &version_token_)) {
     feat_mode_ = FEAT_MODE_FREE;
-    for (int i=0; i<4; i++)
-      pot_fine_value_[i] = 1 << 15;
+    for (int i=0; i<4; i++) {
+      pot_fine_value_[i] = 0;
+      pot_parameter_value_[i] = UINT16_MAX;
+      pot_level_value_[i] = UINT16_MAX;
+      pot_atten_value_[i] = UINT16_MAX;
+    }
   }
 
   // synchronize pots at startup
@@ -131,7 +135,7 @@ void Ui::Poll() {
     animation_counter_++;
     for (uint8_t i=0; i<kNumLeds; i++)
       leds_.set(i, false);
-    leds_.set(feat_mode_, animation_counter_ & 128);
+    leds_.set(last_touched_pot_, animation_counter_ & 128);
     break;
 
   case UI_MODE_NORMAL:
@@ -187,9 +191,13 @@ void Ui::OnSwitchReleased(const Event& e) {
 
       case UI_MODE_NORMAL:
 	feat_mode_ = static_cast<FeatureMode>((feat_mode_ + 1) % FEAT_MODE_LAST);
-	// reset pots fine value
-	for (int i=0; i<4; i++)
-	  pot_fine_value_[i] = 1 << 15;
+	// reset all alternate values
+	for (int i=0; i<4; i++) {
+	  pot_fine_value_[i] = UINT16_MAX / 2;
+	  pot_level_value_[i] = UINT16_MAX;
+	  pot_atten_value_[i] = UINT16_MAX;
+	  pot_parameter_value_[i] = UINT16_MAX;
+	}
 	storage.ParsimoniousSave(&feat_mode_, SETTINGS_SIZE, &version_token_);
 	break;
       }
@@ -203,9 +211,23 @@ void Ui::OnPotChanged(const Event& e) {
   case UI_MODE_SPLASH:
     break;
   case UI_MODE_ZOOM:
-    pot_fine_value_[e.control_id] = e.data;
+    switch (e.control_id) {
+    case 0:
+      pot_fine_value_[last_touched_pot_] = e.data;
+      break;
+    case 1:
+      pot_level_value_[last_touched_pot_] = e.data;
+      break;
+    case 2:
+      pot_atten_value_[last_touched_pot_] = e.data;
+      break;
+    case 3:
+      pot_parameter_value_[last_touched_pot_] = e.data;
+      break;
+    }
     break;
   case UI_MODE_NORMAL:
+    last_touched_pot_ = e.control_id;
     if (!catchup_state_[e.control_id]) {
       pot_coarse_value_[e.control_id] = e.data;
     } else if (abs(e.data - pot_coarse_value_[e.control_id]) < kCatchupThreshold) {

@@ -65,12 +65,24 @@ class Ui {
   void DoEvents();
   void FlushEvents();
 
-  uint16_t coarse(uint8_t channel) {
+  inline uint16_t coarse(uint8_t channel) {
     return pot_coarse_value_[channel];
   }
 
-  int16_t fine(uint8_t channel) {
+  inline int16_t fine(uint8_t channel) {
     return pot_fine_value_[channel] - 32768;
+  }
+
+  inline uint16_t parameter(uint8_t channel) {
+    return pot_parameter_value_[channel];
+  }
+
+  inline uint16_t level(uint8_t channel) {
+    return pot_level_value_[channel];
+  }
+
+  inline uint16_t atten(uint8_t channel) {
+    return pot_atten_value_[channel];
   }
 
   inline FeatureMode feat_mode() const { return feat_mode_; }
@@ -90,6 +102,7 @@ class Ui {
   uint16_t pot_value_[4];
   uint16_t pot_filtered_value_[4];
   uint16_t pot_coarse_value_[4];
+  uint8_t last_touched_pot_;
   uint32_t press_time_[kNumSwitches];
   bool detect_very_long_press_[kNumSwitches];
   bool catchup_state_[4];
@@ -106,10 +119,16 @@ class Ui {
   FeatureMode feat_mode_;
   uint8_t padding[3];
   uint16_t pot_fine_value_[4];
+  uint16_t pot_level_value_[4];
+  uint16_t pot_atten_value_[4];
+  uint16_t pot_parameter_value_[4];
 
   enum SettingsSize {
     SETTINGS_SIZE = sizeof(feat_mode_) +
     sizeof(pot_fine_value_) +
+    sizeof(pot_parameter_value_) +
+    sizeof(pot_level_value_) +
+    sizeof(pot_atten_value_) +
     sizeof(padding)
   };
 
