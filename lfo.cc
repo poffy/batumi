@@ -49,6 +49,8 @@ void Lfo::Init() {
   divider_counter_ = 0;
   cycle_counter_ = 0;
   level_ = UINT16_MAX;
+  current_value_ = UINT16_MAX / 2;
+  next_value_ = 0;
 }
 
 void Lfo::Step() {
@@ -62,6 +64,22 @@ void Lfo::Step() {
   // that subtraction is a bit unexplainable, but it avoids an
   // overflow which advances the divided phases very slightly...
   multiplied_phase_ = divided_phase_ * multiplier_;
+
+  // compute the next random value
+  if (multiplied_phase_ < phase_increment_ / divider_ * multiplier_) {
+    current_value_ = next_value_;
+    switch (random_type_) {
+    case RANDOM_WHITE:
+      next_value_ = Random::GetSample(); break;
+    case RANDOM_LOGISTIC:
+      current_value_ = next_value_;
+      uint16_t x = current_value_ + 32768;
+      uint16_t z = (x * (UINT16_MAX - x)) >> 16;
+      next_value_ = (z * 4) - 32768;
+      if (cycle_counter_ & (1 << 7)) next_value_ += Random::GetSample() >> 4;
+      break;
+    }
+  }
 }
 
 void Lfo::Reset(uint8_t subsample) {
@@ -117,6 +135,18 @@ inline int16_t Lfo::ComputeSampleShape(LfoShape s, uint32_t phase) {
     return ComputeSampleTrapezoid(phase);
   case SHAPE_SQUARE:
     return ComputeSampleSquare(phase);
+  case SHAPE_RANDOM_STEP:
+    random_type_ = RANDOM_WHITE;
+    return ComputeSampleRandom(phase, false);
+  case SHAPE_RANDOM_SMOOTH:
+    random_type_ = RANDOM_WHITE;
+    return ComputeSampleRandom(phase, true);
+  case SHAPE_LOGISTIC_STEP:
+    random_type_ = RANDOM_LOGISTIC;
+    return ComputeSampleRandom(phase, false);
+  case SHAPE_LOGISTIC_SMOOTH:
+    random_type_ = RANDOM_LOGISTIC;
+    return ComputeSampleRandom(phase, true);
   }
   return 0;			// never reached
 }
@@ -215,6 +245,19 @@ int16_t Lfo::ComputeSampleSquare(uint32_t phase) {
     x = INT16_MAX;
   else
     x = INT16_MIN;
+  return x * level_ >> 16;
+}
+
+int16_t Lfo::ComputeSampleRandom(uint32_t phase, bool interpolation) {
+  int16_t x;
+
+  if (interpolation) {
+    phase = Interpolate1022(wav_sine, (phase / 2) + UINT32_MAX / 4 * 3) + 32768;
+    x = (next_value_ - current_value_) * phase / 65535 + current_value_;
+  } else {
+    x = current_value_;
+  }
+
   return x * level_ >> 16;
 }
 

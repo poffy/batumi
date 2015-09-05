@@ -47,7 +47,11 @@ enum LfoShape {
   SHAPE_RAMP,
   SHAPE_SAW,
   SHAPE_TRIANGLE,
-  SHAPE_SQUARE
+  SHAPE_SQUARE,
+  SHAPE_RANDOM_STEP,
+  SHAPE_RANDOM_SMOOTH,
+  SHAPE_LOGISTIC_STEP,
+  SHAPE_LOGISTIC_SMOOTH,
 };
 
 const uint8_t kNumLfoShapes = 5;
@@ -107,6 +111,7 @@ class Lfo {
   int16_t ComputeSampleRamp(uint32_t phase);
   int16_t ComputeSampleSaw(uint32_t phase);
   int16_t ComputeSampleSquare(uint32_t phase);
+  int16_t ComputeSampleRandom(uint32_t phase, bool interpolation);
 
  private:
 
@@ -130,6 +135,19 @@ class Lfo {
    * after reset */
   int16_t step_begin_[kNumLfoShapes];
   int16_t step_end_[kNumLfoShapes];
+
+  /* random waveshapes */
+  int16_t next_value_;
+  int16_t current_value_;
+
+
+  enum RandomType {
+    RANDOM_WHITE,
+    RANDOM_LOGISTIC,
+  };
+
+  RandomType random_type_;
+
 
   DISALLOW_COPY_AND_ASSIGN(Lfo);
 };
