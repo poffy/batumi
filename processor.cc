@@ -155,8 +155,8 @@ void Processor::Process() {
       lfo_[i].set_divider(AdcValuesToDivider(ui_->coarse(i),
 					     ui_->fine(i),
 					     adc_->cv(i)));
-      // we also need to reset the divider count:
-      if (reset_triggered_[0]) {
+      // when 1st channel resets, all other channels reset
+      if (!ui_->sync_mode() && reset_triggered_[0]) {
 	lfo_[i].Reset(reset_subsample_[0]);
       }
     }
