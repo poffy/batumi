@@ -50,6 +50,13 @@ inline uint16_t AdcValuesToPhase(uint16_t pot, int16_t fine, int16_t cv) {
   return Interpolate88(lut_scale_phase, ctrl);
 }
 
+inline uint16_t AdcValuesToLevel(uint16_t pot, int16_t cv) {
+  int32_t ctrl = pot + cv - 256;
+  CONSTRAIN(ctrl, 0, UINT16_MAX);
+  // lut_scale_phase is completely linear, so we can use it for levels
+  return Interpolate88(lut_scale_phase, ctrl);
+}
+
 void Processor::SetFrequency(int8_t lfo_no) {
   int16_t reset = adc_->reset(lfo_no);
 
@@ -117,7 +124,7 @@ void Processor::Process() {
   }
 
   for (int i=0; i<kNumChannels; i++)
-    lfo_[i].set_level(ui_->level(i));
+    lfo_[i].set_level(AdcValuesToLevel(ui_->level(i), 0));
 
   switch (ui_->feat_mode()) {
 
