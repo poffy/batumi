@@ -139,10 +139,31 @@ void Processor::Process() {
 
   case FEAT_MODE_QUAD:
   {
+    // 1st channel sets frequency as usual
     SetFrequency(0);
+
+    // the others are special cases
     for (int i=1; i<kNumChannels; i++) {
+
+      // main pot and CV sets level
+      int32_t cv = (adc_->cv(i) * ui_->atten(i)) >> 16;
+      lfo_[i].set_level(AdcValuesToLevel(ui_->coarse(i), cv)); // overrides previous call
+
+      // channel i is divided by i+1; "fine" parameter adjusts
+      // divider (+/- 3)
       lfo_[i].link_to(&lfo_[0]);
-      lfo_[i].set_initial_phase((kNumChannels - i) * (UINT16_MAX >> 2));
+      int16_t div = - (7 * static_cast<int32_t>(ui_->fine(i) + INT16_MAX / 7)) >> 16;
+      div += i + 2;
+      CONSTRAIN(div, 1, 64);
+      lfo_[i].set_divider(div);
+
+      // "level" parameter controls ?
+      // TODO
+
+      // last parameter controls phase
+      lfo_[i].set_initial_phase(ui_->parameter(i));
+
+      // TODO: check that it's not reset by ext sync
     }
   }
   break;
