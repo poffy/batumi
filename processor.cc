@@ -79,9 +79,11 @@ void Processor::SetFrequency(int8_t lfo_no) {
   if (reset_triggered_[lfo_no]) {
     if (ui_->sync_mode()) {
       lfo_[lfo_no].set_period(last_reset_[lfo_no]);
+      lfo_[lfo_no].Reset(reset_subsample_[lfo_no]);
       synced_[lfo_no] = true;
+    } else {
+      lfo_[lfo_no].Reset(reset_subsample_[lfo_no]);
     }
-    lfo_[lfo_no].Reset(reset_subsample_[lfo_no]);
     reset_trigger_armed_[lfo_no] = false;
     last_reset_[lfo_no] = 0;
   } else {
