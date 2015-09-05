@@ -76,10 +76,10 @@ lookup_tables.append(('scale_freq', scale_freq_fun(x)))
 # scaler for phase selection
 step = 65536 / 4
 scale_phase = [(step*0)-1, (step*1)-1, (step*2)-1, (step*3)-1, (step*4)-1]
-scale_divide = [32, 16, 8, 4, 3, 2]
 scale_phase_fun = interpolate.interp1d(fader_scale5, scale_phase, kind='quadratic')
 lookup_tables.append(('scale_phase', scale_phase_fun(x)))
 
 # scaler for divider
+scale_divide = [32, 16, 8, 4, 3, 2]
 scale_divide_fun = interpolate.interp1d(fader_scale6, scale_divide, kind='nearest')
 lookup_tables.append(('scale_divide', scale_divide_fun(x)))
