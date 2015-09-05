@@ -198,11 +198,32 @@ void Processor::Process() {
   if (ui_->feat_mode() == FEAT_MODE_QUAD &&
       shape == SHAPE_TRAPEZOID)
     shape = SHAPE_SQUARE;
+
+  int32_t sample1 = 0;
+  int32_t sample2 = 0;
+  int32_t gain = 0;
+
   // send to DAC and step
-  for (int i=0; i<kNumChannels; i++) {
+  for (int i=kNumChannels-1; i>=0; i--) {
     lfo_[i].Step();
-    dac_->set_sine(i, lfo_[i].ComputeSampleShape(SHAPE_SINE));
-    dac_->set_asgn(i, lfo_[i].ComputeSampleShape(shape));
+
+    if (ui_->feat_mode() != FEAT_MODE_QUAD) {
+      sample1 = sample2 = gain = 0;
+    }
+
+    sample1 += lfo_[i].ComputeSampleShape(SHAPE_SINE);
+    sample2 += lfo_[i].ComputeSampleShape(shape);
+    gain += lfo_[i].level();
+
+    if (ui_->feat_mode() == FEAT_MODE_QUAD) {
+      // normalized
+      int32_t g = gain < UINT16_MAX ? UINT16_MAX : gain;
+      dac_->set_sine(i, ((sample1 << 13) / g) << 3);
+      dac_->set_asgn(i, ((sample2 << 13) / g) << 3);
+    } else {
+      dac_->set_sine(i, sample1);
+      dac_->set_asgn(i, sample2);
+    }
   }
 }
 }
