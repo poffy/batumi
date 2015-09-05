@@ -187,6 +187,10 @@ void Processor::Process() {
   }
 
   LfoShape shape = static_cast<LfoShape>(ui_->shape()+1);
+
+  if (ui_->feat_mode() == FEAT_MODE_QUAD &&
+      shape == SHAPE_TRAPEZOID)
+    shape = SHAPE_SQUARE;
   // send to DAC and step
   for (int i=0; i<kNumChannels; i++) {
     lfo_[i].Step();
