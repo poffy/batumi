@@ -210,10 +210,12 @@ int16_t Lfo::ComputeSampleTrapezoid(uint32_t phase) {
 }
 
 int16_t Lfo::ComputeSampleSquare(uint32_t phase) {
+  int16_t x;
   if (phase < UINT32_MAX / 2)
-    return INT16_MAX;
+    x = INT16_MAX;
   else
-    return INT16_MIN;
+    x = INT16_MIN;
+  return x * level_ >> 16;
 }
 
 }  // namespace batumi
