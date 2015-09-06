@@ -73,7 +73,7 @@ void Ui::Poll() {
       press_time_[i] = system_clock.milliseconds();
       detect_very_long_press_[i] = false;
     }
-    if (switches_.pressed(i)) {
+    if (switches_.pressed(i) && press_time_[i]) {
       int32_t pressed_time = system_clock.milliseconds() - press_time_[i];
 
       if (!detect_very_long_press_[i]) {
