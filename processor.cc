@@ -214,8 +214,14 @@ void Processor::Process() {
   case FEAT_MODE_LAST: break;	// to please the compiler
   }
 
-  LfoShape shape = static_cast<LfoShape>(ui_->shape()+1);
+  uint8_t offset =
+    ui_->bank() == BANK_CLASSIC ? SHAPE_TRAPEZOID :
+    ui_->bank() == BANK_RANDOM ? SHAPE_RANDOM_STEP :
+    42;
 
+  LfoShape shape = static_cast<LfoShape>(ui_->shape() + offset);
+
+  // exception: in quad mode, trapezoid becomes square
   if (ui_->feat_mode() == FEAT_MODE_QUAD &&
       shape == SHAPE_TRAPEZOID)
     shape = SHAPE_SQUARE;
