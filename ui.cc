@@ -176,6 +176,7 @@ void Ui::OnSwitchReleased(const Event& e) {
       bank_ = static_cast<WaveBank>((bank_ + 1) % BANK_LAST);
       animation_counter_ = 0;
       mode_ = UI_MODE_SPLASH;
+      storage.ParsimoniousSave(&feat_mode_, SETTINGS_SIZE, &version_token_);
     } else if (e.data > kLongPressDuration) {
       if (mode_ == UI_MODE_NORMAL)
 	mode_ = UI_MODE_ZOOM;
