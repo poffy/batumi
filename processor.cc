@@ -79,7 +79,7 @@ void Processor::SetFrequency(int8_t lfo_no) {
   if (reset_triggered_[lfo_no]) {
     if (ui_->sync_mode()) {
       lfo_[lfo_no].set_period(last_reset_[lfo_no]);
-      lfo_[lfo_no].Reset(reset_subsample_[lfo_no]);
+      lfo_[lfo_no].align();
       synced_[lfo_no] = true;
     } else {
       lfo_[lfo_no].Reset(reset_subsample_[lfo_no]);
@@ -158,8 +158,8 @@ void Processor::Process() {
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].link_to(&lfo_[0]);
       lfo_[i].set_divider(AdcValuesToDivider(ui_->coarse(i),
-					     ui_->fine(i),
-					     filtered_cv_[i]));
+      					     ui_->fine(i),
+      					     filtered_cv_[i]));
       // when 1st channel resets, all other channels reset
       if (!ui_->sync_mode() && reset_triggered_[0]) {
 	lfo_[i].Reset(reset_subsample_[0]);
