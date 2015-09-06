@@ -92,7 +92,7 @@ void Processor::SetFrequency(int8_t lfo_no) {
 
   int16_t pitch = AdcValuesToPitch(ui_->coarse(lfo_no),
 				   ui_->fine(lfo_no),
-				   adc_->cv(lfo_no));
+				   filtered_cv_[lfo_no]);
 
   // set pitch
   if (!synced_[lfo_no] ||
@@ -114,6 +114,11 @@ void Processor::Process() {
     for (int i=0; i<kNumChannels; i++)
       lfo_[i].Init();
     previous_feat_mode_ = ui_->feat_mode();
+  }
+
+  for (int i=0; i<kNumChannels; i++) {
+    // filter CV
+    filtered_cv_[i] += (adc_->cv(i) - filtered_cv_[i]) >> 6;
   }
 
   switch (ui_->feat_mode()) {
@@ -142,7 +147,7 @@ void Processor::Process() {
       lfo_[i].link_to(&lfo_[0]);
       lfo_[i].set_initial_phase(AdcValuesToPhase(ui_->coarse(i),
 						 ui_->fine(i),
-						 adc_->cv(i)));
+						 filtered_cv_[i]));
     }
   }
   break;
@@ -154,7 +159,7 @@ void Processor::Process() {
       lfo_[i].link_to(&lfo_[0]);
       lfo_[i].set_divider(AdcValuesToDivider(ui_->coarse(i),
 					     ui_->fine(i),
-					     adc_->cv(i)));
+					     filtered_cv_[i]));
       // when 1st channel resets, all other channels reset
       if (!ui_->sync_mode() && reset_triggered_[0]) {
 	lfo_[i].Reset(reset_subsample_[0]);
