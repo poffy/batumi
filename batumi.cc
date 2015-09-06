@@ -5,7 +5,8 @@
 #include "drivers/system.h"
 #include "drivers/dac.h"
 #include "drivers/adc.h"
-
+#include "stmlib/utils/random.h"
+#include "stmlib/system/uid.h"
 #include "ui.h"
 #include "processor.h"
 
@@ -38,6 +39,7 @@ void Init() {
   ui.Init(&adc); // must be after adc
   dac.Init();
   processor.Init(&ui, &adc, &dac);
+  Random::Seed(GetUniqueId(1));
 
   sys.StartTimers();
 }
