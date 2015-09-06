@@ -52,6 +52,7 @@ void Ui::Init(Adc *adc) {
 
   if (!storage.ParsimoniousLoad(&feat_mode_, SETTINGS_SIZE, &version_token_)) {
     feat_mode_ = FEAT_MODE_FREE;
+    bank_ = BANK_CLASSIC;
     for (int i=0; i<4; i++) {
       pot_fine_value_[i] = 0;
       pot_parameter_value_[i] = UINT16_MAX;
@@ -170,6 +171,9 @@ void Ui::OnSwitchReleased(const Event& e) {
     break;
   case SWITCH_SELECT:
     if (e.data > kVeryLongPressDuration) {
+      bank_ = static_cast<WaveBank>((bank_ + 1) % BANK_LAST);
+      animation_counter_ = 0;
+      mode_ = UI_MODE_SPLASH;
     } else if (e.data > kLongPressDuration) {
       if (mode_ == UI_MODE_NORMAL)
 	mode_ = UI_MODE_ZOOM;

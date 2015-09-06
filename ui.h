@@ -55,6 +55,12 @@ enum UiMode {
   UI_MODE_ZOOM,
 };
 
+enum WaveBank {
+  BANK_CLASSIC,
+  BANK_RANDOM,
+  BANK_LAST
+};
+
 class Ui {
  public:
   Ui() { }
@@ -87,6 +93,7 @@ class Ui {
 
   inline FeatureMode feat_mode() const { return feat_mode_; }
   inline UiMode mode() const { return mode_; }
+  inline WaveBank bank() const { return bank_; }
   inline uint8_t shape() const {
     return (switches_.pressed(2) << 1) | switches_.pressed(1);
   }
@@ -117,7 +124,8 @@ class Ui {
   UiMode mode_;
 
   FeatureMode feat_mode_;
-  uint8_t padding[3];
+  WaveBank bank_;
+  uint8_t padding[2];
   uint16_t pot_fine_value_[4];
   uint16_t pot_level_value_[4];
   uint16_t pot_atten_value_[4];
@@ -125,6 +133,7 @@ class Ui {
 
   enum SettingsSize {
     SETTINGS_SIZE = sizeof(feat_mode_) +
+    sizeof(bank_) +
     sizeof(pot_fine_value_) +
     sizeof(pot_parameter_value_) +
     sizeof(pot_level_value_) +
