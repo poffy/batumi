@@ -71,8 +71,10 @@ void Ui::Init(Adc *adc) {
 
 void Ui::Poll() {
   switches_.Debounce();
-  
-  for (uint8_t i = 0; i < kNumSwitches; ++i) {
+
+  // we begin the iteration after the internal switches (or jumpers),
+  // which are polled manually
+  for (uint8_t i = SWITCH_SELECT; i < kNumSwitches; ++i) {
     if (switches_.just_pressed(i)) {
       queue_.AddEvent(CONTROL_SWITCH, i, 0);
       press_time_[i] = system_clock.milliseconds();
