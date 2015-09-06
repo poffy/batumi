@@ -95,7 +95,7 @@ void Processor::SetFrequency(int8_t lfo_no) {
     last_reset_[lfo_no]++;
   }
 
-  int16_t cv = (adc_->cv(lfo_no) * ui_->atten(lfo_no)) >> 16;
+  int16_t cv = (filtered_cv_[lfo_no] * ui_->atten(lfo_no)) >> 16;
 
   int16_t pitch = AdcValuesToPitch(ui_->coarse(lfo_no),
 				   ui_->fine(lfo_no),
@@ -123,8 +123,12 @@ void Processor::Process() {
     previous_feat_mode_ = ui_->feat_mode();
   }
 
-  for (int i=0; i<kNumChannels; i++)
+  for (int i=0; i<kNumChannels; i++) {
+    // set level
     lfo_[i].set_level(AdcValuesToLevel(ui_->level(i), 0));
+    // filter CV
+    filtered_cv_[i] += (adc_->cv(i) - filtered_cv_[i]) >> 6;
+  }
 
   switch (ui_->feat_mode()) {
 
@@ -146,7 +150,7 @@ void Processor::Process() {
     for (int i=1; i<kNumChannels; i++) {
 
       // main pot and CV sets level
-      int32_t cv = (adc_->cv(i) * ui_->atten(i)) >> 16;
+      int32_t cv = (filtered_cv_[i] * ui_->atten(i)) >> 16;
       lfo_[i].set_level(AdcValuesToLevel(ui_->coarse(i), cv)); // overrides previous call
 
       // channel i is divided by i+1; "fine" parameter adjusts
@@ -183,7 +187,7 @@ void Processor::Process() {
     else // normal phase mode
       for (int i=1; i<kNumChannels; i++) {
 	lfo_[i].link_to(&lfo_[0]);
-	int16_t cv = (adc_->cv(i) * ui_->atten(i)) >> 16;
+	int16_t cv = (filtered_cv_[i] * ui_->atten(i)) >> 16;
 	lfo_[i].set_initial_phase(AdcValuesToPhase(ui_->coarse(i),
 						   ui_->fine(i),
 						   cv));
@@ -198,7 +202,7 @@ void Processor::Process() {
 
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].link_to(&lfo_[0]);
-      int16_t cv = (adc_->cv(i) * ui_->atten(i)) >> 16;
+      int16_t cv = (filtered_cv_[i] * ui_->atten(i)) >> 16;
       lfo_[i].set_divider(AdcValuesToDivider(ui_->coarse(i),
 					     ui_->fine(i),
 					     cv));
