@@ -51,6 +51,7 @@ void Lfo::Init() {
   level_ = UINT16_MAX;
   current_value_ = UINT16_MAX / 2;
   next_value_ = 0;
+  logistic_seed_ = 368 + (Random::GetWord() >> 27);
 }
 
 void Lfo::Step() {
@@ -75,8 +76,8 @@ void Lfo::Step() {
       current_value_ = next_value_;
       uint16_t x = current_value_ + 32768;
       uint16_t z = (x * (UINT16_MAX - x)) >> 16;
-      next_value_ = (z * 4) - 32768;
-      if (cycle_counter_ & (1 << 7)) next_value_ += Random::GetSample() >> 4;
+      next_value_ = (z * logistic_seed_ / 100) - 32768;
+      if (cycle_counter_ & (1 << 7)) next_value_ += Random::GetSample() >> 12;
       break;
     }
   }
