@@ -38,7 +38,7 @@ inline uint8_t AdcValuesToDivider(uint16_t pot, int16_t fine, int16_t cv) {
   int32_t ctrl = pot + cv;
   CONSTRAIN(ctrl, 0, UINT16_MAX);
   fine = (5 * static_cast<int32_t>(fine + INT16_MAX / 5)) >> 16;
-  int8_t div = Interpolate88(lut_scale_divide, ctrl);
+  int8_t div = lut_scale_divide[ctrl >> 8];
   div -= fine;
   CONSTRAIN(div, 1, 64);
   return div;
