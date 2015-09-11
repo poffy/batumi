@@ -191,6 +191,7 @@ void Processor::Process() {
 	lfo_[i].set_initial_phase(AdcValuesToPhase(ui_->coarse(i),
 						   ui_->fine(i),
 						   cv));
+	// TODO parameter?
       }
   }
   break;
@@ -198,7 +199,7 @@ void Processor::Process() {
   case FEAT_MODE_DIVIDE:
   {
     SetFrequency(0);
-    lfo_[0].set_initial_phase(ui_->parameter(0));
+    lfo_[0].set_initial_phase(ui_->parameter(0)); // TODO marche pas!
 
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].link_to(&lfo_[0]);
