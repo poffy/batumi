@@ -106,7 +106,7 @@ class Lfo {
  private:
 
   inline uint32_t phase() {
-    return divided_phase_ + initial_phase_ + alignment_phase_;
+    return divided_phase_ + initial_phase_ + alignment_phase_ / divider_;
   }
 
   int16_t ComputeSampleShape(LfoShape s, uint32_t phase);
