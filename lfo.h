@@ -80,6 +80,10 @@ class Lfo {
     initial_phase_ = phase << 16;
   }
 
+  inline void align() {
+    alignment_phase_ = -phase_;
+  }
+
   inline void set_divider(uint16_t divider) {
     divider_ = divider;
     divider_counter_ = cycle_counter_ % divider_;
@@ -101,6 +105,7 @@ class Lfo {
 
   inline void link_to(Lfo *lfo) {
     phase_ = lfo->phase_;
+    alignment_phase_ = lfo->alignment_phase_;
     phase_increment_ = lfo->phase_increment_;
   }
 
@@ -116,7 +121,7 @@ class Lfo {
  private:
 
   inline uint32_t phase() {
-    return multiplied_phase_ + initial_phase_;
+    return multiplied_phase_ + initial_phase_ + alignment_phase_ / divider_;
   }
 
   int16_t ComputeSampleShape(LfoShape s, uint32_t phase);
@@ -126,7 +131,7 @@ class Lfo {
   uint16_t divider_, divider_counter_, cycle_counter_;
   uint16_t multiplier_;
   uint16_t level_;
-  uint32_t initial_phase_;
+  uint32_t initial_phase_, alignment_phase_;
   uint32_t phase_increment_;
   uint16_t bl_step_counter_;
   uint8_t reset_subsample_;

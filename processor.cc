@@ -86,9 +86,11 @@ void Processor::SetFrequency(int8_t lfo_no) {
   if (reset_triggered_[lfo_no]) {
     if (ui_->sync_mode()) {
       lfo_[lfo_no].set_period(last_reset_[lfo_no]);
+      lfo_[lfo_no].align();
       synced_[lfo_no] = true;
+    } else {
+      lfo_[lfo_no].Reset(reset_subsample_[lfo_no]);
     }
-    lfo_[lfo_no].Reset(reset_subsample_[lfo_no]);
     reset_trigger_armed_[lfo_no] = false;
     last_reset_[lfo_no] = 0;
   } else {
@@ -208,8 +210,8 @@ void Processor::Process() {
 					     ui_->fine(i),
 					     cv));
       lfo_[i].set_initial_phase(ui_->parameter(i));
-      // we also need to reset the divider count:
-      if (reset_triggered_[0]) {
+      // when 1st channel resets, all other channels reset
+      if (!ui_->sync_mode() && reset_triggered_[0]) {
 	lfo_[i].Reset(reset_subsample_[0]);
       }
     }
