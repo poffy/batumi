@@ -102,6 +102,8 @@ void Processor::SetFrequency(int8_t lfo_no) {
   int16_t pitch = AdcValuesToPitch(ui_->coarse(lfo_no),
 				   ui_->fine(lfo_no),
 				   cv);
+  if (ui_->bank() == BANK_RANDOM)
+    pitch += 1 * kOctave;
 
   // set pitch
   if (!synced_[lfo_no] ||
