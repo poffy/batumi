@@ -41,7 +41,7 @@ const char* string_table[] = {
   str_dummy,
 };
 
-const uint16_t lut_scale_freq[] = {
+const uint16_t lut_scale_pitch[] = {
    17906,  18083,  18257,  18427,
    18594,  18758,  18919,  19077,
    19231,  19383,  19531,  19676,
@@ -248,7 +248,7 @@ const uint16_t lut_scale_divide[] = {
 
 
 const uint16_t* lookup_table_table[] = {
-  lut_scale_freq,
+  lut_scale_pitch,
   lut_scale_phase,
   lut_scale_divide,
 };

@@ -28,7 +28,7 @@ void Processor::Init(Ui *ui, Adc *adc, Dac *dac) {
 }
 
 inline int16_t AdcValuesToPitch(uint16_t coarse, int16_t fine, int16_t cv) {
-  coarse = Interpolate88(lut_scale_freq, coarse) - 32768;
+  coarse = Interpolate88(lut_scale_pitch, coarse) - 32768;
   fine = (1 * kOctave * static_cast<int32_t>(fine)) >> 16;
   cv = cv * 5 * kOctave >> 15;
   return coarse + fine + cv;

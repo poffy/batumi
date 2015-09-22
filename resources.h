@@ -50,7 +50,7 @@ extern const uint32_t* lookup_table_32_table[];
 
 extern const int16_t* waveform_table[];
 
-extern const uint16_t lut_scale_freq[];
+extern const uint16_t lut_scale_pitch[];
 extern const uint16_t lut_scale_phase[];
 extern const uint16_t lut_scale_divide[];
 extern const uint32_t lut_increments[];
@@ -94,8 +94,8 @@ extern const int16_t wav_bl_step29[];
 extern const int16_t wav_bl_step30[];
 extern const int16_t wav_bl_step31[];
 #define STR_DUMMY 0  // dummy
-#define LUT_SCALE_FREQ 0
-#define LUT_SCALE_FREQ_SIZE 257
+#define LUT_SCALE_PITCH 0
+#define LUT_SCALE_PITCH_SIZE 257
 #define LUT_SCALE_PHASE 1
 #define LUT_SCALE_PHASE_SIZE 257
 #define LUT_SCALE_DIVIDE 2

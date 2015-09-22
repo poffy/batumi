@@ -68,10 +68,10 @@ x = numpy.arange(0, 65535, 255)
 # scaler for frequency selection
 def freq_to_midi(freq):
     return (12.0 * math.log(freq/440.0, 2) + 69.0)
-scale_freq = map(freq_to_midi, [0.01, 0.05, 0.5, 2.5, 15, 100])
-scale_freq = [(z * 128) + 32768 for z in scale_freq]
-scale_freq_fun = interpolate.interp1d(fader_scale6, scale_freq, kind='quadratic')
-lookup_tables.append(('scale_freq', scale_freq_fun(x)))
+scale_pitch = map(freq_to_midi, [0.01, 0.05, 0.5, 2.5, 15, 100])
+scale_pitch = [(z * 128) + 32768 for z in scale_pitch]
+scale_pitch_fun = interpolate.interp1d(fader_scale6, scale_pitch, kind='quadratic')
+lookup_tables.append(('scale_pitch', scale_pitch_fun(x)))
 
 # scaler for phase selection
 step = 65536 / 4
