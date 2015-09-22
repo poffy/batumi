@@ -245,7 +245,8 @@ int16_t Lfo::ComputeSampleSquare(uint32_t phase) {
   if (phase < UINT32_MAX / 2)
     x = INT16_MAX;
   else
-    x = INT16_MIN;
+    x = INT16_MIN >> 3;		// asymmetric square sounds better
+				// when added in Quad mode.
   return x * level_ >> 16;
 }
 
