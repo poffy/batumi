@@ -40,6 +40,7 @@ namespace batumi {
 using namespace stmlib;
 
 void Lfo::Init() {
+  linked_ = NULL;
   phase_ = 0;
   alignment_phase_ = 0;
   divided_phase_ = 0;
@@ -74,10 +75,16 @@ void Lfo::Step() {
   }
 
   // compute the next random value on phase restart, *only if* we went
-  // through at least half of the previous phase
+  // through a good part of the previous phase (prevents retriggering
+  // when synced)
   if (phase() < phase_increment_ / divider_ * multiplier_ &&
       next_random_armed_) {
-    ComputeNextRandom();
+    if (linked_) {
+      current_value_ = next_value_;
+      next_value_ = linked_->next_value_;
+    } else {
+      ComputeNextRandom();
+    }
     next_random_armed_ = false;
   }
 }

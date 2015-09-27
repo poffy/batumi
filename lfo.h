@@ -104,6 +104,7 @@ class Lfo {
   void Reset(uint8_t subsample);
 
   inline void link_to(Lfo *lfo) {
+    linked_ = lfo;
     phase_ = lfo->phase_;
     alignment_phase_ = lfo->alignment_phase_;
     phase_increment_ = lfo->phase_increment_;
@@ -138,6 +139,7 @@ class Lfo {
   uint8_t reset_subsample_;
   uint16_t logistic_seed_;
   bool next_random_armed_;
+  Lfo* linked_;
 
   /* values of the oscillators for each shape before and
    * after reset */
