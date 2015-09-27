@@ -67,7 +67,12 @@ void Lfo::Step() {
   multiplied_phase_ = divided_phase_ * multiplier_;
 
   // compute the next random value
-  if (multiplied_phase_ < phase_increment_ / divider_ * multiplier_) {
+  if (phase() < phase_increment_ / divider_ * multiplier_) {
+    ComputeNextRandom();
+  }
+}
+
+void Lfo::ComputeNextRandom() {
     current_value_ = next_value_;
     switch (random_type_) {
     case RANDOM_WHITE:
@@ -80,7 +85,6 @@ void Lfo::Step() {
       if (cycle_counter_ & (1 << 7)) next_value_ += Random::GetSample() >> 12;
       break;
     }
-  }
 }
 
 void Lfo::Reset(uint8_t subsample) {
@@ -98,6 +102,7 @@ void Lfo::Reset(uint8_t subsample) {
   phase_ = 0;
   divider_counter_ = 0;
   cycle_counter_ = 0;
+  ComputeNextRandom();
   // and start the reset step
   bl_step_counter_ = WAV_BL_STEP0_SIZE;
   reset_subsample_ = subsample;

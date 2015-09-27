@@ -125,6 +125,7 @@ class Lfo {
   }
 
   int16_t ComputeSampleShape(LfoShape s, uint32_t phase);
+  void ComputeNextRandom();
 
   uint32_t ComputePhaseIncrement(int16_t pitch);
   uint32_t phase_, divided_phase_, multiplied_phase_;
