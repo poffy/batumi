@@ -45,8 +45,9 @@ inline uint8_t AdcValuesToDivider(uint16_t pot, int16_t fine, int16_t cv) {
 }
 
 inline uint16_t AdcValuesToPhase(uint16_t pot, int16_t fine, int16_t cv) {
+  pot = 65536 - pot;
   int32_t ctrl = pot + cv + fine / 8;
-  // no need to clip the result, wrapping around is ok
+  CONSTRAIN(ctrl, 0, UINT16_MAX);
   return Interpolate88(lut_scale_phase, ctrl);
 }
 
