@@ -54,6 +54,7 @@ void Lfo::Init() {
   current_value_ = UINT16_MAX / 2;
   next_value_ = 0;
   logistic_seed_ = 368 + (Random::GetWord() >> 27);
+  next_random_armed_ = false;
 }
 
 void Lfo::Step() {
@@ -68,9 +69,16 @@ void Lfo::Step() {
   // overflow which advances the divided phases very slightly...
   multiplied_phase_ = divided_phase_ * multiplier_;
 
-  // compute the next random value
-  if (phase() < phase_increment_ / divider_ * multiplier_) {
+  if (phase() > UINT32_MAX / 4 * 3) {
+    next_random_armed_ = true;
+  }
+
+  // compute the next random value on phase restart, *only if* we went
+  // through at least half of the previous phase
+  if (phase() < phase_increment_ / divider_ * multiplier_ &&
+      next_random_armed_) {
     ComputeNextRandom();
+    next_random_armed_ = false;
   }
 }
 
@@ -80,10 +88,10 @@ void Lfo::ComputeNextRandom() {
     case RANDOM_WHITE:
       next_value_ = Random::GetSample(); break;
     case RANDOM_LOGISTIC:
-      current_value_ = next_value_;
       uint16_t x = current_value_ + 32768;
       uint16_t z = (x * (UINT16_MAX - x)) >> 16;
       next_value_ = (z * logistic_seed_ / 100) - 32768;
+      // avoids infinite cycles
       if (cycle_counter_ & (1 << 7)) next_value_ += Random::GetSample() >> 12;
       break;
     }

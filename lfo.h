@@ -137,6 +137,7 @@ class Lfo {
   uint16_t bl_step_counter_;
   uint8_t reset_subsample_;
   uint16_t logistic_seed_;
+  bool next_random_armed_;
 
   /* values of the oscillators for each shape before and
    * after reset */
