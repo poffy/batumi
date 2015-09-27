@@ -41,7 +41,9 @@ using namespace stmlib;
 
 void Lfo::Init() {
   phase_ = 0;
+  alignment_phase_ = 0;
   divided_phase_ = 0;
+  multiplied_phase_ = 0;
   initial_phase_ = 0;
   phase_increment_ = UINT32_MAX >> 8;
   divider_ = 1;
@@ -100,6 +102,7 @@ void Lfo::Reset(uint8_t subsample) {
 
   // reset phase etc.
   phase_ = 0;
+  alignment_phase_ = 0;
   divider_counter_ = 0;
   cycle_counter_ = 0;
   ComputeNextRandom();
