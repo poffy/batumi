@@ -51,8 +51,9 @@ inline uint16_t AdcValuesToPhase(uint16_t pot, int16_t fine, int16_t cv) {
   return Interpolate88(lut_scale_phase, ctrl);
 }
 
-inline uint16_t AdcValuesToLevel(uint16_t pot, int16_t cv) {
+inline uint16_t AdcValuesToLevel(uint16_t pot, int16_t fine, int16_t cv) {
   int32_t ctrl = pot + cv - 256;
+  ctrl += fine / 4;
   CONSTRAIN(ctrl, 0, UINT16_MAX);
   // lut_scale_phase is completely linear, so we can use it for levels
   return Interpolate88(lut_scale_phase, ctrl);
@@ -130,7 +131,8 @@ void Processor::Process() {
 
   for (int i=0; i<kNumChannels; i++) {
     // set level
-    lfo_[i].set_level(AdcValuesToLevel(ui_->level(i), 0));
+    if (ui_->feat_mode() != FEAT_MODE_QUAD)
+      lfo_[i].set_level(AdcValuesToLevel(ui_->level(i), 0, 0));
     // filter CV
     filtered_cv_[i] += (adc_->cv(i) - filtered_cv_[i]) >> 6;
   }
@@ -156,7 +158,7 @@ void Processor::Process() {
 
       // main pot and CV sets level
       int32_t cv = (filtered_cv_[i] * ui_->atten(i)) >> 16;
-      lfo_[i].set_level(AdcValuesToLevel(ui_->coarse(i), cv)); // overrides previous call
+      lfo_[i].set_level(AdcValuesToLevel(ui_->coarse(i), ui_->fine(i), cv));
 
       // channel i is divided by i+1; "fine" parameter adjusts
       // divider (+/- 3)
@@ -206,7 +208,7 @@ void Processor::Process() {
   case FEAT_MODE_DIVIDE:
   {
     SetFrequency(0);
-    lfo_[0].set_initial_phase(ui_->parameter(0)); // TODO marche pas!
+    lfo_[0].set_initial_phase(ui_->parameter(0));
 
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].link_to(&lfo_[0]);
