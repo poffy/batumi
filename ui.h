@@ -79,8 +79,8 @@ class Ui {
     return pot_fine_value_[channel] - 32768;
   }
 
-  inline uint16_t parameter(uint8_t channel) {
-    return pot_parameter_value_[channel];
+  inline uint16_t phase(uint8_t channel) {
+    return pot_phase_value_[channel];
   }
 
   inline uint16_t level(uint8_t channel) {
@@ -129,13 +129,13 @@ class Ui {
   uint16_t pot_fine_value_[4];
   uint16_t pot_level_value_[4];
   uint16_t pot_atten_value_[4];
-  uint16_t pot_parameter_value_[4];
+  uint16_t pot_phase_value_[4];
 
   enum SettingsSize {
     SETTINGS_SIZE = sizeof(feat_mode_) +
     sizeof(bank_) +
     sizeof(pot_fine_value_) +
-    sizeof(pot_parameter_value_) +
+    sizeof(pot_phase_value_) +
     sizeof(pot_level_value_) +
     sizeof(pot_atten_value_) +
     sizeof(padding)

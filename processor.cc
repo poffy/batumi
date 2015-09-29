@@ -143,7 +143,7 @@ void Processor::Process() {
   {
     for (uint8_t i=0; i<kNumChannels; i++) {
       SetFrequency(i);
-      lfo_[i].set_initial_phase(ui_->parameter(i));
+      lfo_[i].set_initial_phase(ui_->phase(i));
     }
   }
   break;
@@ -152,7 +152,7 @@ void Processor::Process() {
   {
     // 1st channel sets frequency as usual
     SetFrequency(0);
-    lfo_[0].set_initial_phase(ui_->parameter(0));
+    lfo_[0].set_initial_phase(ui_->phase(0));
 
     // the others are special cases
     for (int i=1; i<kNumChannels; i++) {
@@ -169,7 +169,7 @@ void Processor::Process() {
       lfo_[i].set_divider(div);
 
       // last parameter controls phase
-      lfo_[i].set_initial_phase(ui_->parameter(i));
+      lfo_[i].set_initial_phase(ui_->phase(i));
     }
   }
   break;
@@ -193,7 +193,7 @@ void Processor::Process() {
 	lfo_[i].set_initial_phase(AdcValuesToPhase(ui_->coarse(i),
 						   ui_->fine(i),
 						   cv));
-	int16_t div = (7 * static_cast<int32_t>(65535 - ui_->parameter(i))) >> 16;
+	int16_t div = (7 * static_cast<int32_t>(65535 - ui_->phase(i))) >> 16;
 	CONSTRAIN(div, 1, 16);
 	lfo_[i].set_divider(div);
       }
@@ -203,7 +203,7 @@ void Processor::Process() {
   case FEAT_MODE_DIVIDE:
   {
     SetFrequency(0);
-    lfo_[0].set_initial_phase(ui_->parameter(0));
+    lfo_[0].set_initial_phase(ui_->phase(0));
 
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].link_to(&lfo_[0]);
@@ -211,7 +211,7 @@ void Processor::Process() {
       lfo_[i].set_divider(AdcValuesToDivider(ui_->coarse(i),
 					     ui_->fine(i),
 					     cv));
-      lfo_[i].set_initial_phase(ui_->parameter(i));
+      lfo_[i].set_initial_phase(ui_->phase(i));
       // when 1st channel resets, all other channels reset
       if (!ui_->sync_mode() && reset_triggered_[0]) {
 	lfo_[i].Reset(reset_subsample_[0]);

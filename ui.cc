@@ -55,7 +55,7 @@ void Ui::Init(Adc *adc) {
     bank_ = BANK_CLASSIC;
     for (int i=0; i<4; i++) {
       pot_fine_value_[i] = 0;
-      pot_parameter_value_[i] = UINT16_MAX;
+      pot_phase_value_[i] = UINT16_MAX;
       pot_level_value_[i] = UINT16_MAX;
       pot_atten_value_[i] = UINT16_MAX;
     }
@@ -208,7 +208,7 @@ void Ui::OnSwitchReleased(const Event& e) {
 	  pot_fine_value_[i] = UINT16_MAX / 2;
 	  pot_level_value_[i] = UINT16_MAX;
 	  pot_atten_value_[i] = UINT16_MAX;
-	  pot_parameter_value_[i] = UINT16_MAX;
+	  pot_phase_value_[i] = UINT16_MAX;
 	}
 	storage.ParsimoniousSave(&feat_mode_, SETTINGS_SIZE, &version_token_);
 	break;
@@ -234,7 +234,7 @@ void Ui::OnPotChanged(const Event& e) {
       pot_atten_value_[last_touched_pot_] = e.data;
       break;
     case 3:
-      pot_parameter_value_[last_touched_pot_] = e.data;
+      pot_phase_value_[last_touched_pot_] = e.data;
       break;
     }
     break;
