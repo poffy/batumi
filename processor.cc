@@ -196,7 +196,9 @@ void Processor::Process() {
 	lfo_[i].set_initial_phase(AdcValuesToPhase(ui_->coarse(i),
 						   ui_->fine(i),
 						   cv));
-	// TODO parameter?
+	int16_t div = (7 * static_cast<int32_t>(65535 - ui_->parameter(i))) >> 16;
+	CONSTRAIN(div, 1, 16);
+	lfo_[i].set_divider(div);
       }
   }
   break;
