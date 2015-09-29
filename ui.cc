@@ -51,7 +51,7 @@ void Ui::Init(Adc *adc) {
   animation_counter_ = 0;
 
   if (!storage.ParsimoniousLoad(&feat_mode_, SETTINGS_SIZE, &version_token_)) {
-    feat_mode_ = FEAT_MODE_FREE;
+    feat_mode_ = FEAT_MODE_QUAD;
     bank_ = BANK_CLASSIC;
     for (int i=0; i<4; i++) {
       pot_fine_value_[i] = 0;
@@ -181,7 +181,12 @@ void Ui::OnSwitchReleased(const Event& e) {
       if (mode_ == UI_MODE_NORMAL)
 	mode_ = UI_MODE_ZOOM;
       else if (mode_ == UI_MODE_ZOOM)
+	for (int i=0; i<4; i++)
+	  if (abs(pot_value_[i] - pot_coarse_value_[i]) > kCatchupThreshold) {
+	    catchup_state_[i] = true;
+	  }
 	mode_ = UI_MODE_NORMAL;
+	storage.ParsimoniousSave(&feat_mode_, SETTINGS_SIZE, &version_token_);
     } else {
       switch (mode_) {
       case UI_MODE_SPLASH:
