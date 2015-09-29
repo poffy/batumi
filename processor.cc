@@ -152,6 +152,7 @@ void Processor::Process() {
   {
     // 1st channel sets frequency as usual
     SetFrequency(0);
+    lfo_[0].set_initial_phase(ui_->parameter(0));
 
     // the others are special cases
     for (int i=1; i<kNumChannels; i++) {
@@ -160,21 +161,15 @@ void Processor::Process() {
       int32_t cv = (filtered_cv_[i] * ui_->atten(i)) >> 16;
       lfo_[i].set_level(AdcValuesToLevel(ui_->coarse(i), ui_->fine(i), cv));
 
-      // channel i is divided by i+1; "fine" parameter adjusts
-      // divider (+/- 3)
+      // channel i is divided by i+1; second parameter adjusts divider
       lfo_[i].link_to(&lfo_[0]);
-      int16_t div = - (7 * static_cast<int32_t>(ui_->fine(i) + INT16_MAX / 7)) >> 16;
-      div += i + 2;
-      CONSTRAIN(div, 1, 64);
+      int16_t div = (7 * static_cast<int32_t>(65535 - ui_->level(i))) >> 16;
+      div += i + 1;
+      CONSTRAIN(div, 1, 16);
       lfo_[i].set_divider(div);
-
-      // "level" parameter controls ?
-      // TODO
 
       // last parameter controls phase
       lfo_[i].set_initial_phase(ui_->parameter(i));
-
-      // TODO: check that it's not reset by ext sync
     }
   }
   break;
