@@ -51,7 +51,7 @@ void Ui::Init(Adc *adc) {
   animation_counter_ = 0;
 
   if (!storage.ParsimoniousLoad(&feat_mode_, SETTINGS_SIZE, &version_token_)) {
-    feat_mode_ = FEAT_MODE_QUAD;
+    feat_mode_ = FEAT_MODE_FREE;
     bank_ = BANK_CLASSIC;
     for (int i=0; i<4; i++) {
       pot_fine_value_[i] = 0;
