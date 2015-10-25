@@ -65,9 +65,7 @@ void Lfo::Step() {
     cycle_counter_++;
   }
   divided_phase_ = phase_ / divider_ +
-    (UINT32_MAX - UINT32_MAX / 750) / divider_ * divider_counter_;
-  // that subtraction is a bit unexplainable, but it avoids an
-  // overflow which advances the divided phases very slightly...
+    UINT32_MAX / divider_ * divider_counter_;
   multiplied_phase_ = divided_phase_ * multiplier_;
 
   if (phase() > UINT32_MAX / 4 * 3) {
