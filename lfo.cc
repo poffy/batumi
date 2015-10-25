@@ -56,10 +56,14 @@ void Lfo::Init() {
   next_value_ = 0;
   logistic_seed_ = 368 + (Random::GetWord() >> 27);
   next_random_armed_ = false;
+  direction_ = true;
+  hold_ = false;
 }
 
 void Lfo::Step() {
-  phase_ += phase_increment_;
+  if (!linked_ && !hold_)
+    phase_ += direction_ ? phase_increment_ : -phase_increment_;
+
   if (phase_ < phase_increment_) {
     divider_counter_ = (divider_counter_ + 1) % divider_;
     cycle_counter_++;
@@ -88,18 +92,18 @@ void Lfo::Step() {
 }
 
 void Lfo::ComputeNextRandom() {
-    current_value_ = next_value_;
-    switch (random_type_) {
-    case RANDOM_WHITE:
-      next_value_ = Random::GetSample(); break;
-    case RANDOM_LOGISTIC:
-      uint16_t x = current_value_ + 32768;
-      uint16_t z = (x * (UINT16_MAX - x)) >> 16;
-      next_value_ = (z * logistic_seed_ / 100) - 32768;
-      // avoids infinite cycles
-      if (cycle_counter_ & (1 << 7)) next_value_ += Random::GetSample() >> 12;
-      break;
-    }
+  current_value_ = next_value_;
+  switch (random_type_) {
+  case RANDOM_WHITE:
+    next_value_ = Random::GetSample(); break;
+  case RANDOM_LOGISTIC:
+    uint16_t x = current_value_ + 32768;
+    uint16_t z = (x * (UINT16_MAX - x)) >> 16;
+    next_value_ = (z * logistic_seed_ / 100) - 32768;
+    // avoids infinite cycles
+    if (cycle_counter_ & (1 << 7)) next_value_ += Random::GetSample() >> 12;
+    break;
+  }
 }
 
 void Lfo::Reset(uint8_t subsample) {

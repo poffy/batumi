@@ -101,6 +101,18 @@ class Lfo {
     return level_;
   }
 
+  inline void set_direction(bool direction) {
+    direction_ = direction;
+  }
+
+  inline bool direction() {
+    return direction_;
+  }
+
+  inline void set_hold(bool hold) {
+    hold_ = hold;
+  }
+
   void Reset(uint8_t subsample);
 
   inline void link_to(Lfo *lfo) {
@@ -141,6 +153,7 @@ class Lfo {
   uint16_t logistic_seed_;
   bool next_random_armed_;
   Lfo* linked_;
+  bool direction_, hold_;
 
   /* values of the oscillators for each shape before and
    * after reset */
