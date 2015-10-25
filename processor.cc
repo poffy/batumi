@@ -25,6 +25,7 @@ void Processor::Init(Ui *ui, Adc *adc, Dac *dac) {
     reset_trigger_armed_[i]= false;
     last_reset_[i] = 0;
   }
+  waveform_offset_ = 0;
 }
 
 inline int16_t AdcValuesToPitch(uint16_t coarse, int16_t fine, int16_t cv) {
@@ -51,30 +52,6 @@ inline uint16_t AdcValuesToPhase(uint16_t pot, int16_t fine, int16_t cv) {
 }
 
 void Processor::SetFrequency(int8_t lfo_no) {
-  int16_t reset = adc_->reset(lfo_no);
-
-  // detect triggers on the reset input
-  if (reset < kResetThresholdLow)
-    reset_trigger_armed_[lfo_no] = true;
-
-  if (reset > kResetThresholdHigh &&
-      reset_trigger_armed_[lfo_no]) {
-    reset_triggered_[lfo_no] = true;
-    int32_t dist_to_trig = kResetThresholdHigh - previous_reset_[lfo_no];
-    int32_t dist_to_next = reset - previous_reset_[lfo_no];
-    reset_subsample_[lfo_no] = dist_to_trig * 32L / dist_to_next;
-  } else {
-    reset_triggered_[lfo_no] = false;
-  }
-
-  previous_reset_[lfo_no] = reset;
-
-  // // hold if negative reset
-  // if (reset < kHoldThreshold) {
-  //   lfo_[lfo_no].set_pitch(INT16_MIN);
-  //   return;
-  // }
-
   // sync or reset
   if (reset_triggered_[lfo_no]) {
     if (ui_->sync_mode()) {
@@ -114,11 +91,30 @@ void Processor::Process() {
     for (int i=0; i<kNumChannels; i++)
       lfo_[i].Init();
     previous_feat_mode_ = ui_->feat_mode();
+    waveform_offset_ = 0;
   }
 
   for (int i=0; i<kNumChannels; i++) {
     // filter CV
     filtered_cv_[i] += (adc_->cv(i) - filtered_cv_[i]) >> 6;
+
+    // detect triggers on the reset input
+    int16_t reset = adc_->reset(i);
+
+    if (reset < kResetThresholdLow)
+      reset_trigger_armed_[i] = true;
+
+    if (reset > kResetThresholdHigh &&
+	reset_trigger_armed_[i]) {
+      reset_triggered_[i] = true;
+      int32_t dist_to_trig = kResetThresholdHigh - previous_reset_[i];
+      int32_t dist_to_next = reset - previous_reset_[i];
+      reset_subsample_[i] = dist_to_trig * 32L / dist_to_next;
+    } else {
+      reset_triggered_[i] = false;
+    }
+
+    previous_reset_[i] = reset;
   }
 
   switch (ui_->feat_mode()) {
@@ -133,6 +129,16 @@ void Processor::Process() {
   case FEAT_MODE_QUAD:
   {
     SetFrequency(0);
+    // reset 2 holds the LFOs
+    lfo_[0].set_hold(reset_triggered_[1]);
+    // reset 3 changes direction
+    lfo_[0].set_direction(!reset_triggered_[2]);
+    // reset 4 changes waveform
+    if (reset_triggered_[3]) {
+      waveform_offset_++;
+      reset_trigger_armed_[3] = false;
+    }
+
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].link_to(&lfo_[0]);
       lfo_[i].set_initial_phase((kNumChannels - i) * (UINT16_MAX >> 2));
@@ -143,6 +149,15 @@ void Processor::Process() {
   case FEAT_MODE_PHASE:
   {
     SetFrequency(0);
+    // reset 2 holds the LFOs
+    lfo_[0].set_hold(reset_triggered_[1]);
+    // reset 3 changes direction
+    lfo_[0].set_direction(!reset_triggered_[2]);
+    // reset 4 changes waveform
+    if (reset_triggered_[3]) {
+      waveform_offset_++;
+      reset_trigger_armed_[3] = false;
+    }
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].link_to(&lfo_[0]);
       lfo_[i].set_initial_phase(AdcValuesToPhase(ui_->coarse(i),
@@ -155,6 +170,15 @@ void Processor::Process() {
   case FEAT_MODE_DIVIDE:
   {
     SetFrequency(0);
+    // reset 2 holds the LFOs
+    lfo_[0].set_hold(reset_triggered_[1]);
+    // reset 3 changes direction
+    lfo_[0].set_direction(!reset_triggered_[2]);
+    // reset 4 changes waveform
+    if (reset_triggered_[3]) {
+      waveform_offset_++;
+      reset_trigger_armed_[3] = false;
+    }
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].link_to(&lfo_[0]);
       lfo_[i].set_divider(AdcValuesToDivider(ui_->coarse(i),
@@ -174,7 +198,8 @@ void Processor::Process() {
   // send to DAC and step
   for (int i=0; i<kNumChannels; i++) {
     lfo_[i].Step();
-    LfoShape shape = static_cast<LfoShape>(ui_->shape()+1);
+    int s = ((ui_->shape() + waveform_offset_) % 4) + 1;
+    LfoShape shape = static_cast<LfoShape>(s);
     dac_->set_sine(i, lfo_[i].ComputeSampleShape(SHAPE_SINE));
     dac_->set_asgn(i, lfo_[i].ComputeSampleShape(shape));
   }
