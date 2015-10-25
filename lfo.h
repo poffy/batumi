@@ -88,6 +88,22 @@ class Lfo {
     level_ = level;
   }
 
+  inline uint16_t level() {
+    return level_;
+  }
+
+  inline void set_direction(bool direction) {
+    direction_ = direction;
+  }
+
+  inline bool direction() {
+    return direction_;
+  }
+
+  inline void set_hold(bool hold) {
+    hold_ = hold;
+  }
+
   void Reset(uint8_t subsample);
 
   inline void link_to(Lfo *lfo) {
@@ -120,6 +136,7 @@ class Lfo {
   uint32_t phase_increment_;
   uint16_t bl_step_counter_;
   uint8_t reset_subsample_;
+  bool direction_, hold_;
 
   /* values of the oscillators for each shape before and
    * after reset */

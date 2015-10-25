@@ -48,18 +48,20 @@ void Lfo::Init() {
   divider_counter_ = 0;
   cycle_counter_ = 0;
   level_ = UINT16_MAX;
+  direction_ = true;
+  hold_ = false;
 }
 
 void Lfo::Step() {
-  phase_ += phase_increment_;
+  if (!hold_)
+    phase_ += direction_ ? phase_increment_ : -phase_increment_;
+
   if (phase_ < phase_increment_) {
     divider_counter_ = (divider_counter_ + 1) % divider_;
     cycle_counter_++;
   }
   divided_phase_ = phase_ / divider_ +
     UINT32_MAX / divider_ * divider_counter_;
-  // that subtraction is a bit unexplainable, but it avoids an
-  // overflow which advances the divided phases very slightly...
 }
 
 void Lfo::Reset(uint8_t subsample) {
