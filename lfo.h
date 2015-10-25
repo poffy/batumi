@@ -86,7 +86,6 @@ class Lfo {
 
   inline void set_divider(uint16_t divider) {
     divider_ = divider;
-    divider_counter_ = cycle_counter_ % divider_;
   }
 
   inline void set_multiplier(uint16_t mult) {
@@ -143,7 +142,7 @@ class Lfo {
 
   uint32_t ComputePhaseIncrement(int16_t pitch);
   uint32_t phase_, divided_phase_, multiplied_phase_;
-  uint16_t divider_, divider_counter_, cycle_counter_;
+  uint16_t divider_, cycle_counter_;
   uint16_t multiplier_;
   uint16_t level_;
   uint32_t initial_phase_, alignment_phase_;

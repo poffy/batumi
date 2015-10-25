@@ -49,7 +49,6 @@ void Lfo::Init() {
   phase_increment_ = UINT32_MAX >> 8;
   divider_ = 1;
   multiplier_ = 1;
-  divider_counter_ = 0;
   cycle_counter_ = 0;
   level_ = UINT16_MAX;
   current_value_ = UINT16_MAX / 2;
@@ -65,11 +64,11 @@ void Lfo::Step() {
     phase_ += direction_ ? phase_increment_ : -phase_increment_;
 
   if (phase_ < phase_increment_) {
-    divider_counter_ = (divider_counter_ + 1) % divider_;
     cycle_counter_++;
   }
+
   divided_phase_ = phase_ / divider_ +
-    UINT32_MAX / divider_ * divider_counter_;
+    UINT32_MAX / divider_ * (cycle_counter_ % divider_);
   multiplied_phase_ = divided_phase_ * multiplier_;
 
   if (phase() > UINT32_MAX / 4 * 3) {
@@ -120,7 +119,6 @@ void Lfo::Reset(uint8_t subsample) {
   // reset phase etc.
   phase_ = 0;
   alignment_phase_ = 0;
-  divider_counter_ = 0;
   cycle_counter_ = 0;
   ComputeNextRandom();
   // and start the reset step
