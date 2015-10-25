@@ -81,7 +81,6 @@ class Lfo {
 
   inline void set_divider(uint16_t divider) {
     divider_ = divider;
-    divider_counter_ = cycle_counter_ % divider_;
   }
 
   inline void set_level(uint16_t level) {
@@ -96,10 +95,6 @@ class Lfo {
     direction_ = direction;
   }
 
-  inline bool direction() {
-    return direction_;
-  }
-
   inline void set_hold(bool hold) {
     hold_ = hold;
   }
@@ -108,6 +103,7 @@ class Lfo {
 
   inline void link_to(Lfo *lfo) {
     phase_ = lfo->phase_;
+    direction_ = lfo->direction_;
     alignment_phase_ = lfo->alignment_phase_;
     phase_increment_ = lfo->phase_increment_;
   }
@@ -130,7 +126,7 @@ class Lfo {
 
   uint32_t ComputePhaseIncrement(int16_t pitch);
   uint32_t phase_, divided_phase_;
-  uint16_t divider_, divider_counter_, cycle_counter_;
+  uint16_t divider_, cycle_counter_;
   uint16_t level_;
   uint32_t initial_phase_, alignment_phase_;
   uint32_t phase_increment_;

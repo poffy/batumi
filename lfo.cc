@@ -45,7 +45,6 @@ void Lfo::Init() {
   initial_phase_ = 0;
   phase_increment_ = UINT32_MAX >> 8;
   divider_ = 1;
-  divider_counter_ = 0;
   cycle_counter_ = 0;
   level_ = UINT16_MAX;
   direction_ = true;
@@ -53,15 +52,15 @@ void Lfo::Init() {
 }
 
 void Lfo::Step() {
-  if (!hold_)
+  if (!hold_) {
     phase_ += direction_ ? phase_increment_ : -phase_increment_;
-
-  if (phase_ < phase_increment_) {
-    divider_counter_ = (divider_counter_ + 1) % divider_;
-    cycle_counter_++;
   }
+
+  if (phase_ < phase_increment_)
+    direction_ ? cycle_counter_++ : cycle_counter_--;
+
   divided_phase_ = phase_ / divider_ +
-    UINT32_MAX / divider_ * divider_counter_;
+    UINT32_MAX / divider_ * (cycle_counter_ % divider_);
 }
 
 void Lfo::Reset(uint8_t subsample) {
@@ -76,7 +75,6 @@ void Lfo::Reset(uint8_t subsample) {
 
   // reset phase etc.
   phase_ = 0;
-  divider_counter_ = 0;
   cycle_counter_ = 0;
   // and start the reset step
   bl_step_counter_ = WAV_BL_STEP0_SIZE;
