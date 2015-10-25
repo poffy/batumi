@@ -51,6 +51,12 @@ inline uint16_t AdcValuesToPhase(uint16_t pot, int16_t fine, int16_t cv) {
   return Interpolate88(lut_scale_phase, ctrl);
 }
 
+inline uint16_t AdcValuesToLevel(uint16_t pot, int16_t fine, int16_t cv) {
+  int32_t ctrl = pot + cv + fine / 8 - UINT16_MAX/16;
+  CONSTRAIN(ctrl, 0, UINT16_MAX);
+  return Interpolate88(lut_scale_phase, ctrl);
+}
+
 void Processor::SetFrequency(int8_t lfo_no) {
   // sync or reset
   if (reset_triggered_[lfo_no]) {
@@ -141,6 +147,9 @@ void Processor::Process() {
 
     for (int i=1; i<kNumChannels; i++) {
       lfo_[i].link_to(&lfo_[0]);
+      lfo_[i].set_level(AdcValuesToLevel(ui_->coarse(i),
+					 ui_->fine(i),
+					 filtered_cv_[i]));
       lfo_[i].set_initial_phase((kNumChannels - i) * (UINT16_MAX >> 2));
     }
   }
