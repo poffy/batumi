@@ -64,7 +64,7 @@ void Lfo::Step() {
     phase_ += direction_ ? phase_increment_ : -phase_increment_;
 
   if (phase_ < phase_increment_) {
-    cycle_counter_++;
+    direction_ ? cycle_counter_++ : cycle_counter_--;
   }
 
   divided_phase_ = phase_ / divider_ +

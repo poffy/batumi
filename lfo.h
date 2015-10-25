@@ -117,6 +117,7 @@ class Lfo {
   inline void link_to(Lfo *lfo) {
     linked_ = lfo;
     phase_ = lfo->phase_;
+    direction_ = lfo->direction_;
     alignment_phase_ = lfo->alignment_phase_;
     phase_increment_ = lfo->phase_increment_;
   }
