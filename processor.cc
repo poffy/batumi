@@ -60,29 +60,6 @@ inline uint16_t AdcValuesToLevel(uint16_t pot, int16_t fine, int16_t cv) {
 }
 
 void Processor::SetFrequency(int8_t lfo_no) {
-  int16_t reset = adc_->reset(lfo_no);
-
-  // detect triggers on the reset input
-  if (reset < kResetThresholdLow)
-    reset_trigger_armed_[lfo_no] = true;
-
-  if (reset > kResetThresholdHigh &&
-      reset_trigger_armed_[lfo_no]) {
-    reset_triggered_[lfo_no] = true;
-    int32_t dist_to_trig = kResetThresholdHigh - previous_reset_[lfo_no];
-    int32_t dist_to_next = reset - previous_reset_[lfo_no];
-    reset_subsample_[lfo_no] = dist_to_trig * 32L / dist_to_next;
-  } else {
-    reset_triggered_[lfo_no] = false;
-  }
-
-  previous_reset_[lfo_no] = reset;
-
-  // // hold if negative reset
-  // if (reset < kHoldThreshold) {
-  //   lfo_[lfo_no].set_pitch(INT16_MIN);
-  //   return;
-  // }
 
   // sync or reset
   if (reset_triggered_[lfo_no]) {
@@ -135,6 +112,24 @@ void Processor::Process() {
       lfo_[i].set_level(AdcValuesToLevel(ui_->level(i), 0, 0));
     // filter CV
     filtered_cv_[i] += (adc_->cv(i) - filtered_cv_[i]) >> 6;
+
+    // detect triggers on the reset input
+    int16_t reset = adc_->reset(i);
+
+    if (reset < kResetThresholdLow)
+      reset_trigger_armed_[i] = true;
+
+    if (reset > kResetThresholdHigh &&
+	reset_trigger_armed_[i]) {
+      reset_triggered_[i] = true;
+      int32_t dist_to_trig = kResetThresholdHigh - previous_reset_[i];
+      int32_t dist_to_next = reset - previous_reset_[i];
+      reset_subsample_[i] = dist_to_trig * 32L / dist_to_next;
+    } else {
+      reset_triggered_[i] = false;
+    }
+
+    previous_reset_[i] = reset;
   }
 
   switch (ui_->feat_mode()) {
