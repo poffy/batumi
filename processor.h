@@ -36,6 +36,7 @@ private:
   int16_t last_pitch_[kNumChannels];
   bool synced_[kNumChannels];
   int16_t filtered_cv_[kNumChannels];
+  int8_t waveform_offset_;
 
   void SetFrequency(int8_t lfo_no);
 

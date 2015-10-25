@@ -25,6 +25,7 @@ void Processor::Init(Ui *ui, Adc *adc, Dac *dac) {
     reset_trigger_armed_[i]= false;
     last_reset_[i] = 0;
   }
+  waveform_offset_ = 0;
 }
 
 inline int16_t AdcValuesToPitch(uint16_t coarse, int16_t fine, int16_t cv) {
@@ -104,6 +105,7 @@ void Processor::Process() {
     for (int i=0; i<kNumChannels; i++)
       lfo_[i].Init();
     previous_feat_mode_ = ui_->feat_mode();
+    waveform_offset_ = 0;
   }
 
   for (int i=0; i<kNumChannels; i++) {
@@ -173,6 +175,16 @@ void Processor::Process() {
   {
     SetFrequency(0);
 
+    // reset 2 holds the LFOs
+    lfo_[0].set_hold(reset_triggered_[1]);
+    // reset 3 changes direction
+    lfo_[0].set_direction(!reset_triggered_[2]);
+    // reset 4 changes waveform
+    if (reset_triggered_[3]) {
+      waveform_offset_++;
+      reset_trigger_armed_[3] = false;
+    }
+
     // if all the pots are maxed out, quadrature mode
     if (ui_->coarse(1) > UINT16_MAX - 256 &&
 	ui_->coarse(2) > UINT16_MAX - 256 &&
@@ -223,7 +235,8 @@ void Processor::Process() {
     ui_->bank() == BANK_RANDOM ? SHAPE_RANDOM_STEP :
     42;
 
-  LfoShape shape = static_cast<LfoShape>(ui_->shape() + offset);
+  int s = ((ui_->shape() + waveform_offset_) % 4) + offset;
+  LfoShape shape = static_cast<LfoShape>(s);
 
   // exception: in quad mode, trapezoid becomes square
   if (ui_->feat_mode() == FEAT_MODE_QUAD &&
