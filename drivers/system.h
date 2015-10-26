@@ -1,6 +1,8 @@
+// Copyright 2015 Matthias Puech.
 // Copyright 2013 Olivier Gillet.
 //
-// Author: Olivier Gillet (ol.gillet@gmail.com)
+// Original Author: Olivier Gillet (ol.gillet@gmail.com)
+// Modified by: Matthias Puech (matthias.puech@gmail.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
