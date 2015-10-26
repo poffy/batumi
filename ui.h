@@ -1,4 +1,4 @@
-// Copyright 2013 Matthias Puech.
+// Copyright 2015 Matthias Puech.
 //
 // Author: Matthias Puech (matthias.puech@gmail.com)
 //
@@ -24,7 +24,7 @@
 //
 // -----------------------------------------------------------------------------
 //
-// Settings
+// User Interface
 
 #ifndef BATUMI_UI_H_
 #define BATUMI_UI_H_
