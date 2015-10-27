@@ -129,6 +129,12 @@ class Application(Frame):
 
     def createWidgets(self):
 
+
+        # logo = PhotoImage(file="logo.gif")
+        # label = Label(image=logo)
+        # label.image = logo
+        # label.pack(side="top", fill="both")
+
         Label(self,
               text="Batumi firmware update tool",
               font=("Helvetica", 20)).pack(side="top", fill="both")
@@ -153,12 +159,12 @@ class Application(Frame):
               anchor=W).pack(side="bottom", fill="x")
 
         self.ok = Button(self, text="OK", command=self.ok)
-        self.ok.pack(side=BOTTOM)
+        self.ok.pack(side="bottom", fill="y")
 
     def __init__(self, master=None):
         Frame.__init__(self, master)
         self.data = map(lambda c: ord(c), file(firmware_name+".bin", 'rb').read())
-        self.pack(padx=5, pady=5)
+        self.pack(padx=5, pady=3)
         self.createWidgets()
 
 root = Tk()
