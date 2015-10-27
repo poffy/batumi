@@ -129,12 +129,6 @@ class Application(Frame):
 
     def createWidgets(self):
 
-
-        # logo = PhotoImage(file="logo.gif")
-        # label = Label(image=logo)
-        # label.image = logo
-        # label.pack(side="top", fill="both")
-
         Label(self,
               text="Batumi firmware update tool",
               font=("Helvetica", 20)).pack(side="top", fill="both")
@@ -160,6 +154,11 @@ class Application(Frame):
 
         self.ok = Button(self, text="OK", command=self.ok)
         self.ok.pack(side="bottom", fill="y")
+
+        logo = PhotoImage(file="logo.gif")
+        label = Label(image=logo)
+        label.image = logo
+        label.pack()
 
     def __init__(self, master=None):
         Frame.__init__(self, master)
