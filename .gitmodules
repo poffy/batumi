@@ -1,3 +1,9 @@
 [submodule "stmlib"]
 	path = stmlib
 	url = https://github.com/mqtthiqs/stmlib.git
+[submodule "flasher/pyserial"]
+	path = flasher/pyserial
+	url = git@github.com:pyserial/pyserial.git
+[submodule "flasher/stm32loader"]
+	path = flasher/stm32loader
+	url = git@github.com:jsnyder/stm32loader.git
