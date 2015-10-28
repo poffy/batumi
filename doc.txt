@@ -9,6 +9,14 @@ List of changes with respect to the previous version:
   divisions not accessible previously.
 - when in Sync, phase will be aligned to the external tap.
 
+- in Quad mode, Pots 2, 3, and 4 control the respective channel's
+  amplitude. CV inputs are added to this level.
+
+- in Quad, Phase and Divide modes, Reset input 2 now holds (pauses)
+  all the LFOs, Reset input 3 reverses the direction of the wave,
+  Reset input 4 selects next waveform. Waveform selection is reset
+  when switching modes.
+
 * Batumi alternate firmware documentation
 
 ** Random wave bank
