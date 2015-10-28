@@ -26,7 +26,7 @@ There are now two banks of assignable waveforms: the original one
 unpredictable waveforms. To switch bank, press on the button for two
 seconds, until the short LED animation.
 
-The lower jumpe, or the lower switch if you have the Poti expander,
+The lower jumper, or the lower switch if you have the Poti expander,
 selects the kind of unpredictivity of the waveforms. The first kind is
 classic random voltage sampling: it follows a uniform distribution,
 successive values are picked uniformly on the whole scale, and they
