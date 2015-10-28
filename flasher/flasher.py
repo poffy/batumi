@@ -129,43 +129,49 @@ class Application(Frame):
 
     def createWidgets(self):
 
+        logo = PhotoImage(file="logo.gif")
+        label = Label(self, image=logo)
+        label.image = logo
+        label.pack()
+
         Label(self,
               text="Batumi firmware update tool",
-              font=("Helvetica", 20)).pack(side="top", fill="both")
+              font=("Helvetica", 20)).pack(padx=10, pady=10)
+
+        Label(self,
+              text=firmware_name,
+              font=("Courier", 16)).pack()
 
         self.instruct = StringVar()
-        self.instruct.set("Make sure Batumi is unplugged and click OK.")
+        self.instruct.set("Make sure Batumi is unplugged and click Ok.")
 
         Label(self,
               textvariable=self.instruct,
               anchor=W,
               justify=LEFT,
-              wraplength=300).pack(side="top", fill="both")
+              height=3,
+              wraplength=300).pack()
+
+        self.ok = Button(self, text="Ok", command=self.ok, font=("Helvetica", 14))
+        self.ok.pack(pady=10)
 
         self.status = StringVar()
         self.status.set("ready.")
-        Label(self,
+        Message(self,
               textvariable=self.status,
-              bd=1,
               justify=LEFT,
-              wraplength=300,
+              width=300,
               relief=SUNKEN,
-              anchor=W).pack(side="bottom", fill="x")
-
-        self.ok = Button(self, text="OK", command=self.ok)
-        self.ok.pack(side="bottom", fill="y")
-
-        logo = PhotoImage(file="logo.gif")
-        label = Label(image=logo)
-        label.image = logo
-        label.pack()
+              anchor=W).pack(fill=X)
 
     def __init__(self, master=None):
         Frame.__init__(self, master)
         self.data = map(lambda c: ord(c), file(firmware_name+".bin", 'rb').read())
-        self.pack(padx=5, pady=3)
+        self.pack(padx=2, pady=2, fill=BOTH)
         self.createWidgets()
 
 root = Tk()
+root.resizable(width=FALSE, height=FALSE)
+root.title("Batumi firmware update tool")
 app = Application(master=root)
 app.mainloop()
