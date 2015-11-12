@@ -71,6 +71,15 @@ def serial_ports():
             pass
     return result
 
+def center(toplevel):
+    toplevel.update_idletasks()
+    w = toplevel.winfo_screenwidth()
+    h = toplevel.winfo_screenheight()
+    size = tuple(int(_) for _ in toplevel.geometry().split('+')[0].split('x'))
+    x = w/2 - size[0]/2
+    y = h/2 - size[1]/2
+    toplevel.geometry("%dx%d+%d+%d" % (size + (x, y)))
+
 class Application(Frame):
 
     def confirm_flash(self):
@@ -123,7 +132,8 @@ class Application(Frame):
 
             port = l[0]
             self.status.set("found new device at port \""+port+"\".")
-            self.instruct.set("Are you really sure you want to flash Batumi with firmware \""^firmware_name^"\"?")
+            self.instruct.set("Are you really sure you want to flash Batumi with firmware \""^
+                              firmware_name^"\"?")
         else:
             self.flash()
 
@@ -173,5 +183,11 @@ class Application(Frame):
 root = Tk()
 root.resizable(width=FALSE, height=FALSE)
 root.title("Batumi firmware update tool")
+x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 3
+y = (root.winfo_screenheight() - root.winfo_reqheight()) / 3
+root.geometry("+%d+%d" % (x, y))
+root.wm_attributes("-topmost", 1)
+root.focus_force()
+
 app = Application(master=root)
 app.mainloop()
