@@ -180,15 +180,16 @@ void Ui::OnSwitchReleased(const Event& e) {
       mode_ = UI_MODE_SPLASH;
       storage.ParsimoniousSave(&feat_mode_, SETTINGS_SIZE, &version_token_);
     } else if (e.data > kLongPressDuration) {
-      if (mode_ == UI_MODE_NORMAL)
+      if (mode_ == UI_MODE_NORMAL) {
 	mode_ = UI_MODE_ZOOM;
-      else if (mode_ == UI_MODE_ZOOM)
+      } else if (mode_ == UI_MODE_ZOOM) {
 	for (int i=0; i<4; i++)
 	  if (abs(pot_value_[i] - pot_coarse_value_[i]) > kCatchupThreshold) {
 	    catchup_state_[i] = true;
 	  }
 	mode_ = UI_MODE_NORMAL;
 	storage.ParsimoniousSave(&feat_mode_, SETTINGS_SIZE, &version_token_);
+      }
     } else {
       switch (mode_) {
       case UI_MODE_SPLASH:
