@@ -34,12 +34,11 @@ import glob
 
 from Tkinter import *
 import tkMessageBox
+import tkFileDialog
 
 from stm32loader import *
 
 import serial
-
-firmware_name = "batumi-0.41"
 
 def serial_ports():
     """ Lists serial port names
@@ -105,7 +104,7 @@ class Application(Frame):
             self.done = 42;
             self.ok['state'] = 'normal'
             self.ok['text'] = 'Quit'
-            self.instruct.set("Now you can put the jumper back in its original position, plug Batumi back in your case and have fun!")
+            self.instruct.set("Now you can put the jumper back in its original position, plug the module back in your case and have fun!")
             root.update()
 
         except CmdException as e:
@@ -115,11 +114,16 @@ class Application(Frame):
             cmd.releaseChip()
 
     def ok(self):
-        if not(hasattr(self, 'ports')):
+        if not(hasattr(self, 'data')):
+            filename = tkFileDialog.askopenfilename()
+            self.firmware_name = os.path.basename(filename)
+            self.data = map(lambda c: ord(c), file(filename, 'rb').read())
+            self.instruct.set("Will write firmware \""+self.firmware_name+"\". Make sure the module is unplugged and click Ok.")
+        elif not(hasattr(self, 'ports')):
             self.status.set("listing available devices...")
             self.ports = serial_ports()
             self.status.set("Ready.")
-            self.instruct.set("Now plug Batumi to this computer via USB. It should not be connected to the Eurorack power. Make sure to set the jumper on the back to the Update position (left).")
+            self.instruct.set("Now plug your module to this computer via USB. It should not be connected to the Eurorack power. Make sure to set the jumper on the back to the Update position (left).")
         elif not(hasattr(self, 'port')):
             self.status.set("Detecting new devices...")
             newports = serial_ports()
@@ -135,7 +139,7 @@ class Application(Frame):
 
             self.port = l[0]
             self.status.set("found new device at port \""+self.port+"\".")
-            self.instruct.set("Are you really sure you want to flash Batumi with firmware \""+firmware_name+"\"?")
+            self.instruct.set("Are you really sure you want to flash this module with firmware \""+self.firmware_name+"\"?")
         elif (not (hasattr(self, 'done'))):
             self.instruct.set("")
             self.ok['state'] = 'disabled'
@@ -146,11 +150,13 @@ class Application(Frame):
             root.destroy()
 
     def start(self):
+        if (hasattr(self, 'data')): delattr(self, 'data')
         if (hasattr(self, 'ports')): delattr(self, 'ports')
         if (hasattr(self, 'port')): delattr(self, 'port')
         if (hasattr(self, 'done')): delattr(self, 'done')
         self.ok['state'] = 'normal'
-        self.instruct.set("Make sure Batumi is unplugged and click Ok.")
+        self
+        self.instruct.set("Click Ok to select a firmware file.")
 
     def createWidgets(self):
 
@@ -160,12 +166,8 @@ class Application(Frame):
         label.pack()
 
         Label(self,
-              text="Batumi firmware update tool",
+              text="Firmware update tool",
               font=("Helvetica", 20)).pack(padx=10, pady=10)
-
-        Label(self,
-              text=firmware_name,
-              font=("Courier", 16)).pack()
 
         self.instruct = StringVar()
 
@@ -186,24 +188,21 @@ class Application(Frame):
               justify=LEFT,
               width=300,
               relief=SUNKEN,
-              anchor=W).pack(fill=X)
+              anchor=W).pack(fill=X, side=BOTTOM)
 
         self.start()
 
     def __init__(self, master=None):
         Frame.__init__(self, master)
-        self.data = map(lambda c: ord(c), file(firmware_name+".bin", 'rb').read())
         self.pack(padx=2, pady=2, fill=BOTH)
         self.createWidgets()
 
 root = Tk()
 root.resizable(width=FALSE, height=FALSE)
-root.title("Batumi firmware update tool")
+root.title("Firmware update tool")
 x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 3
 y = (root.winfo_screenheight() - root.winfo_reqheight()) / 3
-root.geometry("+%d+%d" % (x, y))
-root.wm_attributes("-topmost", 1)
-root.focus_force()
+root.geometry("320x400+%d+%d" % (x, y))
 
 app = Application(master=root)
 app.mainloop()
