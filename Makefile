@@ -50,6 +50,9 @@ ORIGINAL_BIN  = $(RESOURCES)/original_firmware.bin
 
 include stmlib/makefile.inc
 
+flasher: bin
+	python2.7 flasher/setup.py py2app
+
 # Rule for uploading the original firmware
 upload_original_serial:
 	python2.7 $(STM32LOADER_PATH)stm32loader.py \
