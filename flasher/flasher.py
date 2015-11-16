@@ -29,9 +29,7 @@
 # GUI Flash utility for STM32 projects, based on stm32loader
 
 import sys
-sys.path.insert(0, 'pyserial')
-sys.path.insert(0, 'stm32loader')
-
+import os.path
 import glob
 
 from Tkinter import *
