@@ -15,6 +15,8 @@ OPTIONS = {
 }
 
 setup(
+    name="XAOC Firmware Update Tool",
+    version="0.1",
     app=APP,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},
