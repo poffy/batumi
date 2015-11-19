@@ -51,7 +51,7 @@ ORIGINAL_BIN  = $(RESOURCES)/original_firmware.bin
 include stmlib/makefile.inc
 
 flasher: bin
-	pyinstaller -y "flasher/XAOC Firmware Update Tool.spec"
+	cd flasher; pyinstaller -y "XAOC Firmware Update Tool.spec"
 
 # Rule for uploading the original firmware
 upload_original_serial:

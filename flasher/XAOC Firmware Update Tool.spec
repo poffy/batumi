@@ -4,10 +4,10 @@ block_cipher = None
 
 
 a = Analysis(['XAOC Firmware Update Tool.py'],
-             pathex=['flasher/'],
+             pathex=[''],
              binaries=None,
-             datas=None,
-             hiddenimports=[],
+             datas=[('logo.gif', '.')],
+             hiddenimports=['serial'],
              hookspath=None,
              runtime_hooks=None,
              excludes=None,
@@ -25,8 +25,8 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
-          console=False , icon='flasher/icon.icns')
+          console=False , icon='../batumi/flasher/icon.icns')
 app = BUNDLE(exe,
              name='XAOC Firmware Update Tool.app',
-             icon='flasher/icon.icns',
+             icon='../batumi/flasher/icon.icns',
              bundle_identifier=None)

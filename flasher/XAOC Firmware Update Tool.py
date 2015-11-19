@@ -29,8 +29,11 @@
 # GUI Flash utility for STM32 projects, based on stm32loader
 
 import sys
+import os
 import os.path
 import glob
+
+import sys
 
 from Tkinter import *
 import tkMessageBox

@@ -7,11 +7,11 @@ Usage:
 
 from setuptools import setup
 
-APP = ['flasher/Flasher.py']
-DATA_FILES = ['flasher/logo.gif']
+APP = ['XAOC Firmware Update Tool.py']
+DATA_FILES = ['logo.gif']
 OPTIONS = {
     'argv_emulation': True,
-    'iconfile':'flasher/icon.icns',
+    'iconfile':'icon.icns',
 }
 
 setup(
