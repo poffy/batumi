@@ -77,6 +77,16 @@ def center(toplevel):
     y = h/2 - size[1]/2
     toplevel.geometry("%dx%d+%d+%d" % (size + (x, y)))
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 class Application(Frame):
 
     def flash(self):
@@ -160,7 +170,7 @@ class Application(Frame):
 
     def createWidgets(self):
 
-        logo = PhotoImage(file="logo.gif")
+        logo = PhotoImage(file=resource_path("logo.gif"))
         label = Label(self, image=logo)
         label.image = logo
         label.pack()
@@ -193,6 +203,7 @@ class Application(Frame):
         self.start()
 
     def __init__(self, master=None):
+        pass
         Frame.__init__(self, master)
         self.pack(padx=2, pady=2, fill=BOTH)
         self.createWidgets()
