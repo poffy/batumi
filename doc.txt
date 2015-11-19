@@ -1,25 +1,90 @@
-* Batumi main firmware: Changelog
+XOAC Firmware Update Tool
+=========================
+
+File: XAOC Firmware Update Tool - OSX.app
+File: XAOC Firmware Update Tool - Windows.exe
+
+This utility will copy the new firmware to the module's flash memory
+via the USB port on the back. There are two executables: one for
+Windows and one for OSX.
+
+To proceed, carefully follow the steps below:
+- Unplug Batumi from the Eurorack power, and find a Mini USB cable to connect
+  Batumi to your computer;
+- Detach the back PCB from the rest of the module by carefully pulling
+  on all edges of the PCB at the same time;
+- Put the "Update" jumper on the back to the "Update" position
+  (leftmost position, ploser to the USB socket).
+- Do *not* plug the USB cable just yet...
+- Launch the update tool, and follow the instructions. You will be
+  asked to plug Batumi after a few steps;
+- When the update is done, do not forget to put the "Update" jumper
+  back to its original position, and to plug it back into your case.
+
+FTDI Drivers
+------------
+
+Both Windows and OSX should come pre-installed with generic drivers to
+communicate with the Batumi, but in some cases it has been found
+necessary to install dedicated drivers (FTDI). First try the tool
+without them; if it fails with the error "No new devices found", you
+will need to install them. Detailed instructions on how to install the
+drivers can be found here:
+
+- Windows: https://learn.sparkfun.com/tutorials/how-to-install-ftdi-drivers/windows---in-depth
+- Mac OS X: https://learn.sparkfun.com/tutorials/how-to-install-ftdi-drivers/mac
+
+Important note
+--------------
+
+In some rare cases, overheating has been observed when USB is plugged
+into Batumi. This could potentially damage your module, and the cause
+is still unknown. Detaching the back PCB from the module should
+prevent this problem, but we advise nontheless to keep one finger on
+the left of the Eurorack power connector (that's where the MCU
+is). Should this zone become hot, unplug the USB connector and please
+report all the circumstances (positions of the jumpers, PCB detached
+or not, step in the update, operating system and driver used...).
+
+
+Batumi main firmware
+====================
+
+File: batumi-v0.41.bin
 
 List of changes with respect to the previous version:
-- a short press on the button can now exit Zoom mode
-- LEDs will flash if the value of a parameter does not correspond to
-  the position of its slider when going out of Zoom mode.
-- in Divide mode, the fine setting will add or subtract 0-3 to the
-  division set outside of Zoom mode. It can be used to access
-  divisions not accessible previously.
-- when in Sync, phase will be aligned to the external tap.
 
 - in Quad mode, Pots 2, 3, and 4 control the respective channel's
   amplitude. CV inputs are added to this level.
 
-- in Quad, Phase and Divide modes, Reset input 2 now holds (pauses)
-  all the LFOs, Reset input 3 reverses the direction of the wave,
-  Reset input 4 selects next waveform. Waveform selection is reset
-  when switching modes.
+- in Quad, Phase and Divide modes, the second Reset input now holds
+  (pauses) all the LFOs, the third Reset input reverses the direction
+  of the wave, the fourth Reset input selects next waveform. Waveform
+  selection is reset when switching modes.
 
-* Batumi alternate firmware documentation
+- when exiting Zoom mode, LEDs will flash if the value of a parameter
+  does not correspond to the position of its slider when going out of
+  Zoom mode.
 
-** Random wave bank
+- in Divide mode, the fine setting will add or subtract 0-3 to the
+  division set outside of Zoom mode. It can be used to access
+  divisions not accessible previously.
+
+- when in Sync, phase will be aligned to the external clock.
+
+- a short press on the button now exits Zoom mode
+
+
+Batumi alternate firmware documentation
+=======================================
+
+File: batumi-alt-v0.21.bin
+
+The alternate firmware has all the features of the new main firmware
+above, plus the following:
+
+Random wave bank
+----------------
 
 There are now two banks of assignable waveforms: the original one
 (saw, ramp, triangle and trapezoid) and a new bank of more
@@ -49,14 +114,15 @@ waveform.
 In Free and Quad mode, the random values of the four channels will be
 completely unrelated. But in Phase mode, only one stream of random
 value will be produced; the other 3 channels will follow the same
-stream, only delayed by the set phase shift. Similarly, in Divide
+stream, only delayed by the phase shift. Similarly, in Divide
 mode, the random values of the slave channels (2-4) will be sampled
 from the master channel (1).
 
-** New Quad mode
+New Quad mode
+-------------
 
-The Quad mode changes its function completely. The old Quadrature mode
-can be accessed in Phase mode by setting the 3 right sliders to their
+The Quad mode changes function completely. The old Quadrature mode can
+be accessed in Phase mode by setting the sliders 2, 3 and 4 to their
 highest position. The phase will then "snap" to quadrature mode.
 
 In the new Quad mode, the channels are summed in various proportions
@@ -69,10 +135,8 @@ sinusoids of Channels 3 and 4; the first Saw output is the sum of the
 saws of all channels. Sliders 2, 3 and 4 (and their CV input) set the
 amplitudes of their respective channel. Square outputs a 1-bit version
 of the Sine output: if Sine is positive, it will be +5V, if Sine is
-negative, it will be -5V.
-
-Note that the division can be changed with the advanced Zoom interface
-(see below).
+negative, it will be -5V. Note that the division can be changed with
+the advanced Zoom interface (see below).
 
 The Sine outputs can be used in your patches to break the
 monotony of modulating with sines. Square output odd rhythms when
@@ -91,7 +155,8 @@ FM input of your oscillator and change the levels.
 A final tip: try to abuse the first Sine output as a VCO, putting an
 offset in the first CV input.
 
-** Advanced zoom interface
+Advanced zoom interface
+-----------------------
 
 The Zoom mode changes drastically: instead of a fine control, it now
 allows to set four different parameters for each channel, including
