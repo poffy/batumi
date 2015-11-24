@@ -13,8 +13,9 @@ To proceed, carefully follow the steps below:
   Batumi to your computer;
 - Detach the back PCB from the rest of the module by carefully pulling
   on all edges of the PCB at the same time;
-- Put the "Update" jumper on the back to the "Update" position
-  (leftmost position, ploser to the USB socket).
+- Put the "Update" jumper on the back to the "Update" position; if
+  needed, you can take a jumper from the waveform select cluster, you
+  will replace it afterwards.
 - Do *not* plug the USB cable just yet...
 - Launch the update tool, and follow the instructions. You will be
   asked to plug Batumi after a few steps;
@@ -82,14 +83,18 @@ File: batumi-alt-v0.21.bin
 
 The alternate firmware has all the features of the new main firmware
 above, plus the following:
+- Random wave bank
+- New Quad mode
+- Advanced zoom interface
+
 
 Random wave bank
 ----------------
 
-There are now two banks of assignable waveforms: the original one
-(saw, ramp, triangle and trapezoid) and a new bank of more
-unpredictable waveforms. To switch bank, press on the button for two
-seconds, until the short LED animation.
+There are now two banks of assignable waveforms (on the Saw/Asgn
+output): the original one--saw, ramp, triangle and trapezoid--and a
+new bank of more unpredictable waveforms. To switch bank, press the
+button for two seconds, until the short LED animation.
 
 The lower jumper, or the lower switch if you have the Poti expander,
 selects the kind of unpredictivity of the waveforms. The first kind is
