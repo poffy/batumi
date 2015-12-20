@@ -136,7 +136,7 @@ class Application(Frame):
             self.status.set("listing available devices...")
             self.ports = serial_ports()
             self.status.set("Ready.")
-            self.instruct.set("Now plug your module to this computer via USB. It should not be connected to the Eurorack power. Make sure to set the jumper on the back to the Update position (left).")
+            self.instruct.set("Now plug your module to this computer via USB. It should not be connected to the Eurorack power. Make sure to set the jumper on the back to the Update position, and to put all the sliders all the way down.")
         elif not(hasattr(self, 'port')):
             self.status.set("Detecting new devices...")
             newports = serial_ports()
