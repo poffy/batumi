@@ -71,6 +71,10 @@ List of changes with respect to the previous version:
   division set outside of Zoom mode. It can be used to access
   divisions not accessible previously.
 
+- when in Sync, the CV input of the channel controls the frequency
+  division/multiplication (1-8). To go out of Sync and back to
+  free-running LFO, move the slider of this channel.
+
 - when in Sync, phase will be aligned to the external clock.
 
 - a short press on the button now exits Zoom mode
