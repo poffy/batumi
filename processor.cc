@@ -89,11 +89,25 @@ inline uint16_t AdcValuesToLevel(uint16_t pot, int16_t fine, int16_t cv) {
 
 void Processor::SetFrequency(int8_t lfo_no) {
 
+  int16_t cv = (filtered_cv_[lfo_no] * ui_->atten(lfo_no)) >> 16;
+
   // sync or reset
   if (reset_triggered_[lfo_no]) {
     if (ui_->sync_mode()) {
-      lfo_[lfo_no].set_period(last_reset_[lfo_no]);
-      lfo_[lfo_no].align();
+      sync_counter_++;
+      uint32_t period = last_reset_[lfo_no];
+      uint16_t divider;
+      // CV multiplies or divides period
+      if (cv > 0) {
+	divider = 1;
+	period /= (cv * 8 / 32767) + 1;
+      } else {
+	divider = (-cv * 8 / 32767) + 1;
+	period *= divider;
+      }
+      lfo_[lfo_no].set_period(period);
+      if (sync_counter_ % divider == 0)
+	lfo_[lfo_no].align();
       synced_[lfo_no] = true;
     } else {
       lfo_[lfo_no].Reset(reset_subsample_[lfo_no]);
@@ -104,8 +118,6 @@ void Processor::SetFrequency(int8_t lfo_no) {
     last_reset_[lfo_no]++;
   }
 
-  int16_t cv = (filtered_cv_[lfo_no] * ui_->atten(lfo_no)) >> 16;
-
   int16_t pitch = AdcValuesToPitch(ui_->coarse(lfo_no),
 				   ui_->fine(lfo_no),
 				   cv);
@@ -114,9 +126,10 @@ void Processor::SetFrequency(int8_t lfo_no) {
 
   // set pitch
   if (!synced_[lfo_no] ||
-      (abs(pitch - last_pitch_[lfo_no]) > kUnsyncPotThreshold)) {
+      ui_->coarse(lfo_no) >= last_coarse_[lfo_no] + kUnsyncPotThreshold ||
+      ui_->coarse(lfo_no) <= last_coarse_[lfo_no] - kUnsyncPotThreshold) {
     lfo_[lfo_no].set_pitch(pitch);
-    last_pitch_[lfo_no] = pitch;
+    last_coarse_[lfo_no] = ui_->coarse(lfo_no);
     synced_[lfo_no] = false;
   }
 }
