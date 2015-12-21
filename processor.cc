@@ -178,6 +178,15 @@ void Processor::Process() {
     SetFrequency(0);
     lfo_[0].set_initial_phase(ui_->phase(0));
 
+    // reset 2 holds the LFOs
+    lfo_[0].set_hold(reset_triggered_[1]);
+    // reset 3 changes direction
+    lfo_[0].set_direction(!reset_triggered_[2]);
+    // reset 4 changes waveform
+    if (reset_triggered_[3]) {
+      waveform_offset_++;
+      reset_trigger_armed_[3] = false;
+    }
     // the others are special cases
     for (int i=1; i<kNumChannels; i++) {
 
