@@ -187,6 +187,9 @@ void Processor::Process() {
       waveform_offset_++;
       reset_trigger_armed_[3] = false;
     }
+
+    lfo_[0].set_level(AdcValuesToLevel(ui_->level(0), 0, 0));
+
     // the others are special cases
     for (int i=1; i<kNumChannels; i++) {
 
