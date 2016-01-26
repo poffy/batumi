@@ -51,7 +51,7 @@ or not, step in the update, operating system and driver used...).
 Batumi main firmware
 ====================
 
-File: batumi-v0.41.bin
+File: batumi-v0.45.bin
 
 List of changes with respect to the previous version:
 
@@ -71,10 +71,6 @@ List of changes with respect to the previous version:
   division set outside of Zoom mode. It can be used to access
   divisions not accessible previously.
 
-- when in Sync, the CV input of the channel controls the frequency
-  division/multiplication (1-8). To go out of Sync and back to
-  free-running LFO, move the slider of this channel.
-
 - when in Sync, phase will be aligned to the external clock.
 
 - a short press on the button now exits Zoom mode
@@ -83,13 +79,18 @@ List of changes with respect to the previous version:
 Batumi alternate firmware documentation
 =======================================
 
-File: batumi-alt-v0.21.bin
+File: batumi-alt-v0.30.bin
 
 The alternate firmware has all the features of the new main firmware
 above, plus the following:
-- Random wave bank
-- New Quad mode
-- Advanced zoom interface
+
+- when synced to an external clock, the CV input of the channel
+  controls the frequency division/multiplication (1-8). To go out of
+  Sync and back to free-running LFO, move the slider of this channel.
+
+- Random wave bank (see below)
+- New Quad mode (see below)
+- Advanced zoom interface (see below)
 
 
 Random wave bank
